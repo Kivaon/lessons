@@ -3,44 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тест библиотеки</title>
+    <title>Библиотека уроков</title>
     <style>
+        * { box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            line-height: 1.6;
-            padding: 24px;
-            background-color: #f9f9f9;
-            color: #333;
-            max-width: 500px;
-            margin: 0 auto;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: #f4f7f6; color: #333; margin: 0; padding: 15px;
         }
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            border-top: 4px solid #2980b9;
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { font-size: 24px; color: #2c3e50; text-align: center; margin-bottom: 20px; }
+        
+        /* Вкладки */
+        .tabs { display: flex; margin-bottom: 15px; background: #e0e0e0; border-radius: 8px; padding: 2px; }
+        .tab-btn { flex: 1; padding: 10px; text-align: center; border: none; background: none; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 14px; }
+        .tab-btn.active { background: white; color: #2980b9; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        /* Карточки уроков */
+        .lesson-card {
+            background: white; padding: 16px; border-radius: 12px; margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03); text-decoration: none; display: block; color: inherit;
         }
-        h1 { font-size: 20px; margin-top: 0; color: #2c3e50; }
-        p { font-size: 16px; }
-        .status {
-            display: inline-block;
-            background: #27ae60;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: bold;
-        }
+        .lesson-title { font-size: 17px; font-weight: bold; color: #2980b9; margin-bottom: 5px; }
+        .lesson-meta { font-size: 12px; color: #7f8c8d; margin-bottom: 8px; }
+        .badge { display: inline-block; background: #e8f4f8; color: #2980b9; padding: 3px 8px; border-radius: 10px; font-size: 11px; }
+
+        /* Стили для Дерева тем */
+        .category-node { margin-left: 15px; margin-top: 5px; }
+        .category-title { font-weight: bold; color: #2c3e50; padding: 6px 0; cursor: pointer; font-size: 15px; }
+        .category-title::before { content: "📁 "; }
     </style>
 </head>
 <body>
+<div class="container">
+    <h1>📚 База Знаний</h1>
 
-    <div class="card">
-        <h1>📚 Проверка связи</h1>
-        <p>Если вы видите этот текст на экране телефона, и он полностью помещается по ширине без необходимости скроллить вбок — значит, **всё работает идеально!**</p>
-        <span class="status">Сайт активен</span>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('recent')">⏰ Последние</button>
+        <button class="tab-btn" onclick="switchTab('topics')">🗂 Тематика</button>
     </div>
 
+    <!-- Панель: Последние уроки -->
+    <div id="recent-panel" class="panel active"></div>
+
+    <!-- Панель: Дерево тем -->
+    <div id="topics-panel" class="panel"></div>
+</div>
+
+<script>
+    let db = [];
+
+    // Переключение вкладок на телефоне
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn, .panel').forEach(el => el.classList.remove('active'));
+        if(tab === 'recent') {
+            document.querySelector('button[onclick="switchTab(\'recent\')"]').classList.add('active');
+            document.getElementById('recent-panel').classList.add('active');
+        } else {
+            document.querySelector('button[onclick="switchTab(\'topics\')"]').classList.add('active');
+            document.getElementById('topics-panel').classList.add('active');
+        }
+    }
+
+    // Рендеринг списка последних уроков
+    function renderRecent() {
+        const container = document.getElementById('recent-panel');
+        // Сортировка по дате (от новых к старым)
+        const sorted = [...db].sort((a,b) => b.date.localeCompare(a.date));
+        
+        container.innerHTML = sorted.map(item => `
+            <a href="${item.file_path}" class="lesson-card">
+                <div class="lesson-title">${item.title}</div>
+                <div class="lesson-meta">Автор: ${item.author} | Дата: ${new Date(item.date).toLocaleDateString()}</div>
+                <div class="badge">${item.tags.join(' / ')}</div>
+            </a>
+        `).join('');
+    }
+
+    // Построение иерархического дерева тем (до 4 уровней)
+    function renderTree() {
+        const container = document.getElementById('topics-panel');
+        container.innerHTML = "";
+        const tree = {};
+
+        // Строим структуру объекта дерева
+        db.forEach(item => {
+            let current = tree;
+            item.tags.forEach((tag, index) => {
+                if (!current[tag]) {
+                    current[tag] = { _lessons: [], _sub: {} };
+                }
+                if (index === item.tags.length - 1) {
+                    current[tag]._lessons.push(item);
+                }
+                current = current[tag]._sub;
+            });
+        });
+
+        function buildHTML(node) {
+            let html = "";
+            for (let key in node) {
+                html += `<div class="category-node">`;
+                html += `<div class="category-title">${key}</div>`;
+                
+                // Выводим уроки в этой ветке
+                if (node[key]._lessons.length > 0) {
+                    node[key]._lessons.forEach(lesson => {
+                        html += `
+                            <a href="${lesson.file_path}" class="lesson-card" style="margin-left:15px; border-top: 2px solid #3498db;">
+                                <div class="lesson-title" style="font-size:15px;">${lesson.title}</div>
+                                <div class="lesson-meta">Автор: ${lesson.author}</div>
+                            </a>`;
+                    });
+                }
+                // Рекурсивно идем глубже по веткам иерархии
+                html += buildHTML(node[key]._sub);
+                html += `</div>`;
+            }
+            return html;
+        }
+        container.innerHTML = buildHTML(tree);
+    }
+
+    // Загрузка реестра нашей библиотеки
+    fetch('library.json')
+        .then(res => res.json())
+        .then(data => {
+            db = data;
+            renderRecent();
+            renderTree();
+        })
+        .catch(err => {
+            document.getElementById('recent-panel').innerHTML = "<p>Добавьте первый урок в реестр library.json</p>";
+        });
+</script>
 </body>
 </html>
