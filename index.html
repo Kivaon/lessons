@@ -10,8 +10,11 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             background-color: #f4f7f6; color: #333; margin: 0; padding: 15px;
         }
-        .container { max-width: 600px; margin: 0 auto; }
+        .container { max-width: 860px; margin: 0 auto; }
         h1 { font-size: 24px; color: #2c3e50; text-align: center; margin-bottom: 20px; }
+        .subtitle { text-align: center; color: #6b7a89; margin: -8px 0 20px; }
+        .toolbar { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .toolbar input, .toolbar select { width: 100%; padding: 10px 12px; border: 1px solid #d9e2ec; border-radius: 10px; background: white; }
         
         /* Вкладки */
         .tabs { display: flex; margin-bottom: 15px; background: #e0e0e0; border-radius: 8px; padding: 2px; }
@@ -34,11 +37,23 @@
         .category-node { margin-left: 15px; margin-top: 5px; }
         .category-title { font-weight: bold; color: #2c3e50; padding: 6px 0; cursor: pointer; font-size: 15px; }
         .category-title::before { content: "📁 "; }
+        .empty-state { background: white; padding: 18px; border-radius: 12px; color: #667; }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>📚 База Знаний</h1>
+    <div class="subtitle">Каталог уроков из локальной библиотеки 04_PUB, опубликованный через GitHub Pages</div>
+
+    <div class="toolbar">
+        <input id="search-input" type="search" placeholder="Поиск по названию, автору, циклу, тегам" oninput="renderAll()">
+        <select id="author-filter" onchange="renderAll()">
+            <option value="">Все авторы</option>
+        </select>
+        <select id="tag-filter" onchange="renderAll()">
+            <option value="">Все теги</option>
+        </select>
+    </div>
 
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('recent')">⏰ Последние</button>
@@ -55,6 +70,44 @@
 <script>
     let db = [];
 
+    function norm(value) {
+        return (value || '').toString().toLowerCase();
+    }
+
+    function getFilteredData() {
+        const query = norm(document.getElementById('search-input')?.value || '');
+        const author = document.getElementById('author-filter')?.value || '';
+        const tag = document.getElementById('tag-filter')?.value || '';
+
+        return db.filter(item => {
+            const haystack = [item.title, item.author, item.cycle, ...(item.tags || [])].join(' | ').toLowerCase();
+            const okQuery = !query || haystack.includes(query);
+            const okAuthor = !author || item.author === author;
+            const okTag = !tag || (item.tags || []).includes(tag);
+            return okQuery && okAuthor && okTag;
+        });
+    }
+
+    function populateFilters() {
+        const authors = [...new Set(db.map(x => x.author).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+        const tags = [...new Set(db.flatMap(x => x.tags || []).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+
+        document.getElementById('author-filter').innerHTML = '<option value="">Все авторы</option>' +
+            authors.map(author => `<option value="${author}">${author}</option>`).join('');
+        document.getElementById('tag-filter').innerHTML = '<option value="">Все теги</option>' +
+            tags.map(tag => `<option value="${tag}">${tag}</option>`).join('');
+    }
+
+    function formatDate(value) {
+        if (!value) return 'Дата не указана';
+        const d = new Date(value);
+        return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString();
+    }
+
+    function renderEmpty(container, message) {
+        container.innerHTML = `<div class="empty-state">${message}</div>`;
+    }
+
     // Переключение вкладок на телефоне
     function switchTab(tab) {
         document.querySelectorAll('.tab-btn, .panel').forEach(el => el.classList.remove('active'));
@@ -70,14 +123,18 @@
     // Рендеринг списка последних уроков
     function renderRecent() {
         const container = document.getElementById('recent-panel');
-        // Сортировка по дате (от новых к старым)
-        const sorted = [...db].sort((a,b) => b.date.localeCompare(a.date));
+        const filtered = getFilteredData();
+        const sorted = [...filtered].sort((a,b) => (b.date || '').localeCompare(a.date || ''));
+        if (!sorted.length) {
+            renderEmpty(container, 'Под выбранные фильтры пока нет уроков.');
+            return;
+        }
         
         container.innerHTML = sorted.map(item => `
             <a href="${item.file_path}" class="lesson-card">
                 <div class="lesson-title">${item.title}</div>
-                <div class="lesson-meta">Автор: ${item.author} | Дата: ${new Date(item.date).toLocaleDateString()}</div>
-                <div class="badge">${item.tags.join(' / ')}</div>
+                <div class="lesson-meta">Автор: ${item.author || 'Не указан'} | Дата: ${formatDate(item.date)}${item.cycle ? ` | Цикл: ${item.cycle}` : ''}</div>
+                <div class="badge">${(item.tags && item.tags.length ? item.tags : ['без тегов']).join(' / ')}</div>
             </a>
         `).join('');
     }
@@ -87,11 +144,18 @@
         const container = document.getElementById('topics-panel');
         container.innerHTML = "";
         const tree = {};
+        const filtered = getFilteredData();
+
+        if (!filtered.length) {
+            renderEmpty(container, 'Нет уроков для отображения в тематическом дереве.');
+            return;
+        }
 
         // Строим структуру объекта дерева
-        db.forEach(item => {
+        filtered.forEach(item => {
             let current = tree;
-            item.tags.forEach((tag, index) => {
+            const tags = (item.tags && item.tags.length ? item.tags : ['Без рубрики']);
+            tags.forEach((tag, index) => {
                 if (!current[tag]) {
                     current[tag] = { _lessons: [], _sub: {} };
                 }
@@ -114,7 +178,7 @@
                         html += `
                             <a href="${lesson.file_path}" class="lesson-card" style="margin-left:15px; border-top: 2px solid #3498db;">
                                 <div class="lesson-title" style="font-size:15px;">${lesson.title}</div>
-                                <div class="lesson-meta">Автор: ${lesson.author}</div>
+                                <div class="lesson-meta">Автор: ${lesson.author || 'Не указан'}${lesson.cycle ? ` | ${lesson.cycle}` : ''}</div>
                             </a>`;
                     });
                 }
@@ -127,16 +191,21 @@
         container.innerHTML = buildHTML(tree);
     }
 
+    function renderAll() {
+        renderRecent();
+        renderTree();
+    }
+
     // Загрузка реестра нашей библиотеки
     fetch('library.json')
         .then(res => res.json())
         .then(data => {
             db = data;
-            renderRecent();
-            renderTree();
+            populateFilters();
+            renderAll();
         })
         .catch(err => {
-            document.getElementById('recent-panel').innerHTML = "<p>Добавьте первый урок в реестр library.json</p>";
+            document.getElementById('recent-panel').innerHTML = "<div class='empty-state'>Не удалось загрузить library.json. Сначала выполните inventory/sync.</div>";
         });
 </script>
 </body>
