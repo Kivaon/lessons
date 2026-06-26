@@ -1,0 +1,67 @@
+{
+  "_instructions": {
+    "version": "1.0",
+    "updated_at": "2026-06-26",
+    "purpose": "Справочник авторов для lessons/TBOX. Скрипты используют этот файл для строгого сопоставления автора и папки библиотеки.",
+    "editing_rules": [
+      "Добавляйте нового автора как новый объект в массив authors.",
+      "folder — это точное имя папки автора в библиотеке.",
+      "display_name — красивое имя для показа пользователю.",
+      "key — стабильный внутренний идентификатор в нижнем регистре с подчеркиваниями.",
+      "short_names и aliases нужны для распознавания разных вариантов ввода.",
+      "Не удаляйте поле _instructions, оно игнорируется скриптами и служит памяткой.",
+      "Следите за JSON-синтаксисом: строки в кавычках, между объектами запятые, после последнего элемента запятой нет."
+    ],
+    "example": {
+      "key": "rav_new_author",
+      "display_name": "Р. Новый Автор",
+      "folder": "rav New Author",
+      "short_names": ["Новый Автор", "р. Новый Автор"],
+      "aliases": ["rav new author", "rabbi new author", "new author"]
+    }
+  },
+  "authors": [
+    {
+    "key": "rav_aharon_levi",
+    "display_name": "Р. Аарон Леви",
+    "folder": "rav Aharon Levi",
+    "short_names": ["Аарон Леви", "р. Аарон Леви"],
+    "aliases": ["rav aharon levi", "rabbi aharon levi", "aaron levi"]
+    },
+    {
+    "key": "rav_moishe_shapiro",
+    "display_name": "Р. Мойше Шапиро",
+    "folder": "rav Moishe Shapiro",
+    "short_names": ["Мойше Шапиро", "р. Мойше Шапиро"],
+    "aliases": ["rav moishe shapiro", "rabbi moishe shapiro", "moishe shapiro"]
+    },
+    {
+    "key": "rav_shaul_cohen",
+    "display_name": "Р. Шауль Коэн",
+    "folder": "rav Shaul Cohen",
+    "short_names": ["Шауль Коэн", "р. Шауль Коэн"],
+    "aliases": ["rav shaul cohen", "rabbi shaul cohen", "shaul cohen", "rav cohen"]
+    },
+    {
+    "key": "rav_yinon_kalazan",
+    "display_name": "Р. Инон Калазан",
+    "folder": "rav Yinon Kalazan",
+    "short_names": ["Инон Калазан", "р. Инон Калазан"],
+    "aliases": ["rav yinon kalazan", "rabbi yinon kalazan", "yinon kalazan"]
+    },
+    {
+    "key": "rav_yonatan_ever",
+    "display_name": "Р. Йонатан Эвер",
+    "folder": "rav Yonatan Ever",
+    "short_names": ["Йонатан Эвер", "р. Йонатан Эвер"],
+    "aliases": ["rav yonatan ever", "rabbi yonatan ever", "yonatan ever", "yonatan eiver"]
+    },
+    {
+    "key": "rav_yosef_mizrahi",
+    "display_name": "Р. Йосеф Мизрахи",
+    "folder": "rav Yosef Mizrahi",
+    "short_names": ["Йосеф Мизрахи", "р. Йосеф Мизрахи"],
+    "aliases": ["rav yosef mizrahi", "rabbi yosef mizrahi", "yosef mizrahi"]
+    }
+  ]
+}
