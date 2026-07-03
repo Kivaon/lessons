@@ -33,10 +33,13 @@
         .lesson-meta { font-size: 12px; color: #7f8c8d; margin-bottom: 8px; }
         .badge { display: inline-block; background: #e8f4f8; color: #2980b9; padding: 3px 8px; border-radius: 10px; font-size: 11px; }
         .meta-action, .tag-chip {
-            border: none; cursor: pointer; font: inherit;
+            border: none; cursor: pointer; font: inherit; appearance: none; -webkit-appearance: none;
         }
         .meta-action {
-            background: #f8eaf1; color: #a64d79; padding: 2px 8px; border-radius: 999px;
+            background: #f4d6e4; color: #9b2c61; padding: 2px 8px; border-radius: 999px; border: 1px solid #e6b8cc;
+        }
+        .meta-action:hover {
+            background: #efc7db;
         }
         .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
         .tag-chip {
