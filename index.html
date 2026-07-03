@@ -83,6 +83,7 @@
 <script>
     let db = [];
     let rubricator = { roots: {} };
+    let activeTagPath = null;
 
     function norm(value) {
         return (value || '').toString().toLowerCase();
@@ -276,11 +277,13 @@
         const tag = document.getElementById('tag-filter')?.value || '';
 
         return db.filter(item => {
+            const paths = normalizeTagPaths(item.tags);
             const haystack = getTagSearchTokens(item).join(' | ').toLowerCase();
             const okQuery = !query || haystack.includes(query);
             const okAuthor = !author || item.author === author;
             const okTag = !tag || getLeafTagNames(item.tags).includes(tag);
-            return okQuery && okAuthor && okTag;
+            const okPath = !activeTagPath || paths.some(path => JSON.stringify(path) === JSON.stringify(activeTagPath));
+            return okQuery && okAuthor && okTag && okPath;
         });
     }
 
