@@ -27,7 +27,7 @@
         /* Карточки уроков */
         .lesson-card {
             background: white; padding: 16px; border-radius: 12px; margin-bottom: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03); display: block; color: inherit;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03); display: block; color: inherit; cursor: pointer;
         }
         .lesson-link { text-decoration: none; color: inherit; display: block; }
         .lesson-title { font-size: 17px; font-weight: bold; color: #2980b9; margin-bottom: 5px; }
@@ -331,7 +331,7 @@
         }
         
         container.innerHTML = sorted.map(item => `
-            <div class="lesson-card">
+            <div class="lesson-card" onclick="window.location.href=${JSON.stringify(item.file_path)}">
                 <a href="${item.file_path}" class="lesson-link">
                     <div class="lesson-title">${item.title}</div>
                 </a>
@@ -382,7 +382,7 @@
                 if (node[key]._lessons.length > 0) {
                     node[key]._lessons.forEach(lesson => {
                         html += `
-                            <div class="lesson-card" style="margin-left:15px; border-top: 2px solid #3498db;">
+                            <div class="lesson-card" style="margin-left:15px; border-top: 2px solid #3498db;" onclick="window.location.href=${JSON.stringify(lesson.file_path)}">
                                 <a href="${lesson.file_path}" class="lesson-link">
                                     <div class="lesson-title" style="font-size:15px;">${lesson.title}</div>
                                 </a>
