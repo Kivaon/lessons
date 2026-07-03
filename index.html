@@ -32,6 +32,16 @@
         .lesson-title { font-size: 17px; font-weight: bold; color: #2980b9; margin-bottom: 5px; }
         .lesson-meta { font-size: 12px; color: #7f8c8d; margin-bottom: 8px; }
         .badge { display: inline-block; background: #e8f4f8; color: #2980b9; padding: 3px 8px; border-radius: 10px; font-size: 11px; }
+        .meta-action, .tag-chip {
+            border: none; cursor: pointer; font: inherit;
+        }
+        .meta-action {
+            background: #eef6ff; color: #1f6fb2; padding: 2px 8px; border-radius: 999px;
+        }
+        .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+        .tag-chip {
+            display: inline-block; background: #e8f4f8; color: #2980b9; padding: 3px 8px; border-radius: 10px; font-size: 11px;
+        }
 
         /* Стили для Дерева тем */
         .category-node { margin-left: 15px; margin-top: 5px; }
@@ -199,11 +209,54 @@
         return meta.label ? `${meta.label}: ${meta.value}` : meta.value;
     }
 
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     function formatTagList(tags) {
         const formatted = normalizeTagPaths(tags)
             .map(formatSingleTagPath)
             .filter(Boolean);
         return formatted.length ? formatted.join(', ') : 'без тегов';
+    }
+
+    function renderClickableTags(tags) {
+        const paths = normalizeTagPaths(tags);
+        if (!paths.length) {
+            return `<span class="badge">без тегов</span>`;
+        }
+        return `<div class="tag-list">${paths.map(path => {
+            const label = formatSingleTagPath(path);
+            const leaf = path[path.length - 1] || '';
+            const pathValue = escapeHtml(JSON.stringify(path));
+            return `<button type="button" class="tag-chip" data-tag="${escapeHtml(leaf)}" data-path='${pathValue}' onclick="event.preventDefault(); event.stopPropagation(); applyTagFilter(this.dataset.tag, this.dataset.path)">${escapeHtml(label)}</button>`;
+        }).join('')}</div>`;
+    }
+
+    function applyAuthorFilter(author) {
+        const select = document.getElementById('author-filter');
+        if (select) select.value = author || '';
+        renderAll();
+    }
+
+    function applyTagFilter(tag, pathJson) {
+        const select = document.getElementById('tag-filter');
+        if (select) select.value = tag || '';
+        renderAll();
+        switchTab('topics');
+        try {
+            const path = JSON.parse(pathJson || '[]');
+            if (Array.isArray(path) && path.length) {
+                const query = path[path.length - 1];
+                const target = Array.from(document.querySelectorAll('.category-title')).find(el => el.textContent.trim() === query);
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        } catch (_) {}
     }
 
     function getTagSearchTokens(item) {
@@ -273,8 +326,8 @@
         container.innerHTML = sorted.map(item => `
             <a href="${item.file_path}" class="lesson-card">
                 <div class="lesson-title">${item.title}</div>
-                <div class="lesson-meta">Автор: ${item.author || 'Не указан'} | Дата: ${formatDate(item.date)}${item.cycle ? ` | Цикл: ${item.cycle}` : ''}</div>
-                <div class="badge">${formatTagList(item.tags)}</div>
+                <div class="lesson-meta">Автор: <button type="button" class="meta-action" onclick="event.preventDefault(); event.stopPropagation(); applyAuthorFilter(${JSON.stringify(item.author || '')})">${item.author || 'Не указан'}</button> | Дата: ${formatDate(item.date)}${item.cycle ? ` | Цикл: ${item.cycle}` : ''}</div>
+                ${renderClickableTags(item.tags)}
             </a>
         `).join('');
     }
