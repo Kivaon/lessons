@@ -27,8 +27,9 @@
         /* Карточки уроков */
         .lesson-card {
             background: white; padding: 16px; border-radius: 12px; margin-bottom: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03); text-decoration: none; display: block; color: inherit;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03); display: block; color: inherit;
         }
+        .lesson-link { text-decoration: none; color: inherit; display: block; }
         .lesson-title { font-size: 17px; font-weight: bold; color: #2980b9; margin-bottom: 5px; }
         .lesson-meta { font-size: 12px; color: #7f8c8d; margin-bottom: 8px; }
         .badge { display: inline-block; background: #e8f4f8; color: #2980b9; padding: 3px 8px; border-radius: 10px; font-size: 11px; }
@@ -330,11 +331,13 @@
         }
         
         container.innerHTML = sorted.map(item => `
-            <a href="${item.file_path}" class="lesson-card">
-                <div class="lesson-title">${item.title}</div>
+            <div class="lesson-card">
+                <a href="${item.file_path}" class="lesson-link">
+                    <div class="lesson-title">${item.title}</div>
+                </a>
                 <div class="lesson-meta">Автор: <button type="button" class="meta-action" onclick="event.preventDefault(); event.stopPropagation(); applyAuthorFilter(${JSON.stringify(item.author || '')})">${item.author || 'Не указан'}</button> | Дата: ${formatDate(item.date)}${item.cycle ? ` | Цикл: ${item.cycle}` : ''}</div>
                 ${renderClickableTags(item.tags)}
-            </a>
+            </div>
         `).join('');
     }
 
@@ -379,10 +382,12 @@
                 if (node[key]._lessons.length > 0) {
                     node[key]._lessons.forEach(lesson => {
                         html += `
-                            <a href="${lesson.file_path}" class="lesson-card" style="margin-left:15px; border-top: 2px solid #3498db;">
-                                <div class="lesson-title" style="font-size:15px;">${lesson.title}</div>
+                            <div class="lesson-card" style="margin-left:15px; border-top: 2px solid #3498db;">
+                                <a href="${lesson.file_path}" class="lesson-link">
+                                    <div class="lesson-title" style="font-size:15px;">${lesson.title}</div>
+                                </a>
                                 <div class="lesson-meta">Автор: ${lesson.author || 'Не указан'}${lesson.cycle ? ` | ${lesson.cycle}` : ''}</div>
-                            </a>`;
+                            </div>`;
                     });
                 }
                 // Рекурсивно идем глубже по веткам иерархии
