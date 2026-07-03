@@ -69,9 +69,149 @@
 
 <script>
     let db = [];
+    let rubricator = { roots: {} };
 
     function norm(value) {
         return (value || '').toString().toLowerCase();
+    }
+
+    function getRootMap() {
+        return rubricator?.roots || {};
+    }
+
+    function isPathCollection(tags) {
+        return Array.isArray(tags) && tags.length > 0 && tags.every(tag => Array.isArray(tag));
+    }
+
+    function isFlatLegacyTags(tags) {
+        return Array.isArray(tags) && tags.every(tag => typeof tag === 'string');
+    }
+
+    function findLongestPathPrefix(sequence) {
+        const clean = (sequence || []).filter(Boolean);
+        if (!clean.length) return [];
+
+        const roots = getRootMap();
+        const rootName = clean[0];
+        let node = roots[rootName];
+        if (!node) return [];
+
+        const path = [rootName];
+        let current = node;
+        for (let i = 1; i < clean.length; i += 1) {
+            const nextName = clean[i];
+            const children = current?.children || {};
+            if (!children[nextName]) break;
+            path.push(nextName);
+            current = children[nextName];
+        }
+        return path;
+    }
+
+    function splitLegacyFlatTags(tags) {
+        const queue = (tags || []).filter(Boolean);
+        const result = [];
+
+        while (queue.length) {
+            const matchedPath = findLongestPathPrefix(queue);
+            if (!matchedPath.length) {
+                result.push([queue.shift()]);
+                continue;
+            }
+
+            if (matchedPath.length === 1 && queue.length > 1) {
+                queue.shift();
+                continue;
+            }
+
+            result.push(matchedPath);
+            queue.splice(0, matchedPath.length);
+        }
+
+        return result;
+    }
+
+    function normalizeTagPaths(tags) {
+        if (!Array.isArray(tags) || !tags.length) return [];
+
+        if (isPathCollection(tags)) {
+            return tags
+                .map(path => Array.isArray(path) ? path.filter(Boolean) : [])
+                .filter(path => path.length);
+        }
+
+        if (isFlatLegacyTags(tags)) {
+            return splitLegacyFlatTags(tags);
+        }
+
+        return [];
+    }
+
+    function getLeafTagNames(tags) {
+        return normalizeTagPaths(tags)
+            .map(path => path[path.length - 1])
+            .filter(Boolean);
+    }
+
+    function resolvePathMetadata(path) {
+        if (!Array.isArray(path) || !path.length) {
+            return { value: '', label: '' };
+        }
+
+        const roots = getRootMap();
+        const rootName = path[0];
+        let current = roots[rootName];
+        if (!current) {
+            return { value: path[path.length - 1], label: '' };
+        }
+
+        let parent = null;
+        let grandParent = null;
+        for (let i = 1; i < path.length; i += 1) {
+            const nextName = path[i];
+            const next = current?.children?.[nextName];
+            if (!next) {
+                return { value: path[path.length - 1], label: '' };
+            }
+            grandParent = parent;
+            parent = current;
+            current = next;
+        }
+
+        let label = '';
+        if (path.length === 1) {
+            label = current?.display_label || '';
+        } else if (path.length === 2) {
+            label = current?.display_label || parent?.children_label || '';
+        } else {
+            label = parent?.children_label || current?.display_label || grandParent?.children_label || '';
+        }
+
+        return {
+            value: path[path.length - 1],
+            label
+        };
+    }
+
+    function formatSingleTagPath(path) {
+        const meta = resolvePathMetadata(path);
+        if (!meta.value) return '';
+        return meta.label ? `${meta.label}: ${meta.value}` : meta.value;
+    }
+
+    function formatTagList(tags) {
+        const formatted = normalizeTagPaths(tags)
+            .map(formatSingleTagPath)
+            .filter(Boolean);
+        return formatted.length ? formatted.join(', ') : 'без тегов';
+    }
+
+    function getTagSearchTokens(item) {
+        const paths = normalizeTagPaths(item.tags);
+        const rawParts = paths.flat();
+        const formatted = paths.map(formatSingleTagPath);
+        const leafs = paths.map(path => path[path.length - 1]);
+        return [item.title, item.author, item.cycle, ...rawParts, ...formatted, ...leafs].filter(Boolean);
     }
 
     function getFilteredData() {
@@ -80,17 +220,17 @@
         const tag = document.getElementById('tag-filter')?.value || '';
 
         return db.filter(item => {
-            const haystack = [item.title, item.author, item.cycle, ...(item.tags || [])].join(' | ').toLowerCase();
+            const haystack = getTagSearchTokens(item).join(' | ').toLowerCase();
             const okQuery = !query || haystack.includes(query);
             const okAuthor = !author || item.author === author;
-            const okTag = !tag || (item.tags || []).includes(tag);
+            const okTag = !tag || getLeafTagNames(item.tags).includes(tag);
             return okQuery && okAuthor && okTag;
         });
     }
 
     function populateFilters() {
         const authors = [...new Set(db.map(x => x.author).filter(Boolean))].sort((a, b) => a.localeCompare(b));
-        const tags = [...new Set(db.flatMap(x => x.tags || []).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+        const tags = [...new Set(db.flatMap(x => getLeafTagNames(x.tags)).filter(Boolean))].sort((a, b) => a.localeCompare(b));
 
         document.getElementById('author-filter').innerHTML = '<option value="">Все авторы</option>' +
             authors.map(author => `<option value="${author}">${author}</option>`).join('');
@@ -134,7 +274,7 @@
             <a href="${item.file_path}" class="lesson-card">
                 <div class="lesson-title">${item.title}</div>
                 <div class="lesson-meta">Автор: ${item.author || 'Не указан'} | Дата: ${formatDate(item.date)}${item.cycle ? ` | Цикл: ${item.cycle}` : ''}</div>
-                <div class="badge">${(item.tags && item.tags.length ? item.tags : ['без тегов']).join(' / ')}</div>
+                <div class="badge">${formatTagList(item.tags)}</div>
             </a>
         `).join('');
     }
@@ -153,16 +293,20 @@
 
         // Строим структуру объекта дерева
         filtered.forEach(item => {
-            let current = tree;
-            const tags = (item.tags && item.tags.length ? item.tags : ['Без рубрики']);
-            tags.forEach((tag, index) => {
-                if (!current[tag]) {
-                    current[tag] = { _lessons: [], _sub: {} };
-                }
-                if (index === item.tags.length - 1) {
-                    current[tag]._lessons.push(item);
-                }
-                current = current[tag]._sub;
+            const paths = normalizeTagPaths(item.tags);
+            const safePaths = paths.length ? paths : [['Без рубрики']];
+
+            safePaths.forEach(path => {
+                let current = tree;
+                path.forEach((tag, index) => {
+                    if (!current[tag]) {
+                        current[tag] = { _lessons: [], _sub: {} };
+                    }
+                    if (index === path.length - 1) {
+                        current[tag]._lessons.push(item);
+                    }
+                    current = current[tag]._sub;
+                });
             });
         });
 
@@ -196,11 +340,14 @@
         renderTree();
     }
 
-    // Загрузка реестра нашей библиотеки
-    fetch('library.json')
-        .then(res => res.json())
-        .then(data => {
-            db = data;
+    // Загрузка рубрикатора и реестра библиотеки
+    Promise.all([
+        fetch('_data/tag_rubricator.json').then(res => res.ok ? res.json() : { roots: {} }).catch(() => ({ roots: {} })),
+        fetch('library.json').then(res => res.json())
+    ])
+        .then(([rubricatorData, libraryData]) => {
+            rubricator = rubricatorData || { roots: {} };
+            db = libraryData;
             populateFilters();
             renderAll();
         })
