@@ -46,6 +46,12 @@
         .tag-chip {
             display: inline-block; background: #e8f4f8; color: #2980b9; padding: 3px 8px; border-radius: 10px; font-size: 11px;
         }
+        .card-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+        .card-action {
+            width: 32px; height: 32px; border-radius: 9px; border: 1px solid #d9e2ec; background: white; color: #51606f;
+            display: inline-flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer;
+        }
+        .card-action[disabled] { opacity: 0.45; cursor: not-allowed; }
 
         /* Стили для Дерева тем */
         .category-node { margin-left: 15px; margin-top: 5px; }
@@ -243,6 +249,23 @@
         }).join('')}</div>`;
     }
 
+    function openLessonAndAutoplay(filePath) {
+        const target = new URL(filePath, window.location.href);
+        target.searchParams.set('autoplay', '1');
+        window.location.href = target.toString();
+    }
+
+    function renderCardActions(item) {
+        return `
+            <div class="card-actions">
+                <button type="button" class="card-action" title="Прослушать" onclick="event.preventDefault(); event.stopPropagation(); openLessonAndAutoplay(${JSON.stringify(item.file_path)})">▶</button>
+                <button type="button" class="card-action" title="Печать" disabled>🖨</button>
+                <button type="button" class="card-action" title="PDF" disabled>📄</button>
+                <button type="button" class="card-action" title="Оригинал" disabled>🔗</button>
+            </div>
+        `;
+    }
+
     function applyAuthorFilter(author) {
         const select = document.getElementById('author-filter');
         if (select) select.value = author || '';
@@ -337,6 +360,7 @@
                 </a>
                 <div class="lesson-meta">Автор: <button type="button" class="meta-action" onclick="event.preventDefault(); event.stopPropagation(); applyAuthorFilter(${JSON.stringify(item.author || '')})">${item.author || 'Не указан'}</button> | Дата: ${formatDate(item.date)}${item.cycle ? ` | Цикл: ${item.cycle}` : ''}</div>
                 ${renderClickableTags(item.tags)}
+                ${renderCardActions(item)}
             </div>
         `).join('');
     }
