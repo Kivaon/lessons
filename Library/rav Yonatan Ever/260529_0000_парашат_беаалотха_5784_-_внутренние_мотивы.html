@@ -24,15 +24,37 @@
     main { background: white; padding: 28px; border-radius: 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.05); }
     .meta { color: #5b6b79; margin-bottom: 24px; }
     article { white-space: pre-wrap; }
-    .action-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
-    .action-btn, .speed-select {
+    .action-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; position: relative; }
+    .action-btn, .settings-select {
       border: 1px solid #d9e2ec; background: white; color: #425466; border-radius: 10px;
       min-width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;
       cursor: pointer; font-size: 16px;
     }
     .action-btn[disabled] { opacity: 0.45; cursor: not-allowed; }
-    .speed-select { padding: 0 8px; min-width: 74px; }
-    .tts-status { color: #6b7a89; font-size: 12px; margin-left: 4px; }
+    .settings-panel {
+      position: absolute; top: calc(100% + 8px); right: 0; z-index: 10; min-width: 250px;
+      background: white; border: 1px solid #d9e2ec; border-radius: 12px; box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+      padding: 12px; display: none;
+    }
+    .settings-panel.open { display: block; }
+    .voice-help {
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 30;
+      display: none; align-items: center; justify-content: center; padding: 20px;
+    }
+    .voice-help.open { display: flex; }
+    .voice-help-dialog {
+      width: min(760px, 100%); max-height: 80vh; overflow: auto; background: white; color: #243447;
+      border-radius: 16px; box-shadow: 0 18px 40px rgba(0,0,0,0.18); padding: 20px;
+    }
+    .voice-help-dialog h3 { margin: 0 0 12px; font-size: 20px; }
+    .voice-help-dialog h4 { margin: 16px 0 8px; font-size: 16px; }
+    .voice-help-dialog p, .voice-help-dialog li { font-size: 14px; line-height: 1.6; }
+    .voice-help-dialog ul, .voice-help-dialog ol { margin: 8px 0 0 20px; padding: 0; }
+    .voice-help-close { margin-top: 16px; }
+    .settings-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+    .settings-row:last-child { margin-bottom: 0; }
+    .settings-label { font-size: 12px; color: #6b7a89; }
+    .settings-select { width: 100%; justify-content: flex-start; padding: 0 10px; min-width: 0; }
   </style>
 </head>
 <body>
@@ -40,20 +62,60 @@
     <div class="action-bar">
       <button type="button" class="action-btn" id="back-btn" title="Назад">←</button>
       <button type="button" class="action-btn" id="listen-btn" title="Прослушать">▶</button>
-      <button type="button" class="action-btn" id="pause-btn" title="Пауза">⏸</button>
-      <button type="button" class="action-btn" id="stop-btn" title="Стоп">⏹</button>
+      <button type="button" class="action-btn" id="settings-btn" title="Настройки озвучки" aria-expanded="false">⚙</button>
       <button type="button" class="action-btn" id="print-btn" title="Печать" disabled>🖨</button>
       <button type="button" class="action-btn" id="pdf-btn" title="PDF" disabled>📄</button>
       <button type="button" class="action-btn" id="original-btn" title="Оригинал" disabled>🔗</button>
-      <select id="tts-speed" class="speed-select" title="Скорость">
-        <option value="0.75">0.75×</option>
-        <option value="1" selected>1.0×</option>
-        <option value="1.25">1.25×</option>
-        <option value="1.5">1.5×</option>
-        <option value="1.75">1.75×</option>
-        <option value="2">2.0×</option>
-      </select>
-      <span class="tts-status" id="tts-status">Готово</span>
+      <div class="settings-panel" id="tts-settings-panel">
+        <div class="settings-row">
+          <label class="settings-label" for="tts-voice">Голос</label>
+          <select id="tts-voice" class="settings-select" title="Голос"></select>
+        </div>
+        <div class="settings-row">
+          <label class="settings-label" for="tts-speed">Скорость</label>
+          <select id="tts-speed" class="settings-select" title="Скорость">
+            <option value="0.75">0.75×</option>
+            <option value="1" selected>1.0×</option>
+            <option value="1.25">1.25×</option>
+            <option value="1.5">1.5×</option>
+            <option value="1.75">1.75×</option>
+            <option value="2">2.0×</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="voice-help" id="voice-help-modal" aria-hidden="true">
+      <div class="voice-help-dialog">
+        <h3>🎧 Как включить приятный мужской голос для озвучки уроков?</h3>
+        <p>По умолчанию ваша система использует стандартный женский голос. Чтобы переключить озвучку на мужской баритон, выполните простую разовую настройку для вашего устройства:</p>
+
+        <h4>Apple (Mac / iPhone / iPad)</h4>
+        <ol>
+          <li>Откройте <strong>Системные настройки → Универсальный доступ → Устный контент</strong>.</li>
+          <li>В пункте <strong>Системный голос</strong> выберите <strong>Управление голосами...</strong></li>
+          <li>Найдите <strong>Русский</strong> и скачайте голос <strong>Yuri (Юрий)</strong>. Рекомендуется версия <strong>«Улучшенный»</strong>.</li>
+          <li>Обновите эту страницу.</li>
+        </ol>
+
+        <h4>Windows 10 / 11</h4>
+        <ol>
+          <li>Откройте <strong>Параметры (Win + I) → Время и язык → Распознавание речи</strong>.</li>
+          <li>В разделе <strong>Голоса</strong> убедитесь, что установлен пакет для русского языка.</li>
+          <li>Выберите в качестве стандартного голоса <strong>Microsoft Pavel (Павел)</strong>.</li>
+          <li>Перезапустите браузер и обновите страницу.</li>
+        </ol>
+
+        <h4>Android (Смартфоны)</h4>
+        <ol>
+          <li>Зайдите в <strong>Настройки → Расширенные настройки (или Доступность) → Язык и ввод → Синтез речи</strong>.</li>
+          <li>Убедитесь, что выбран <strong>Синтезатор речи Google</strong>. Нажмите на иконку шестерёнки рядом с ним.</li>
+          <li>Выберите <strong>Установка голосовых данных → Русский</strong>.</li>
+          <li>Выберите мужской вариант (обычно это <strong>Голос №2</strong>, <strong>№3</strong> или голос с маркировкой <strong>male</strong>).</li>
+        </ol>
+
+        <p>После выполнения настройки просто обновите эту страницу, и сайт автоматически переключится на новый голос.</p>
+        <button type="button" class="action-btn voice-help-close" id="voice-help-close">Понятно</button>
+      </div>
     </div>
     <h1>ПАРАШАТ БЕААЛОТХА, 5784     -       ВНУТРЕННИЕ МОТИВЫ</h1>
     <div class="meta"><strong>Р. Йонатан Эвер</strong><br>2026-05-29</div>
@@ -67,7 +129,7 @@
 
 Хазаль говорят, что Тора записала в нашей параше особый раздел — «И было при отправлении ковчега» [Бемидбар 10:35], чтобы разделить три бедствия, упомянутые в этой параше.
 
-Первое бедствие, описанное в отрывке «И отправились они от горы Господней» [там же, 33] - поспешный уход с места, где они провели целый год «как школьники, сбежавшие из школы»). Это Тора приводит до раздела «И было при отправлении ковчега», а после него упоминаются два дополнительных бедствия. Чтобы эти три бедствия не следовали одно за другим, создавая отрицательную преемственность (хазака) для народа Исраэля, Тора разделила их специальным разделом. Сегодня я хотел бы поговорить об этих двух бедствиях. 
+Первое бедствие, описанное в отрывке «И отправились они от горы Господней» [там же, 33] - поспешный уход с места, где они провели целый год «как школьники, сбежавшие из школы»). Это Тора приводит до раздела «И было при отправлении ковчега», а после него упоминаются два дополнительных бедствия. Чтобы эти три бедствия не следовали одно за другим, создавая отрицательную преемственность (хазака) для народа Исраэля, Тора разделила их специальным разделом. Сегодня я хотел бы поговорить об этих двух бедствиях.
 
 Второе бедствие, упомянутое в нашей параше: «И был народ как бы ропщущим (ке-митаонним) на зло в ушах Ашема; и услышал Ашем, и возгорелся гнев Его, и возгорелся у них огонь Ашема, и пожрал край стана» [там же 11:1].
 
@@ -117,7 +179,7 @@
 
 Обычно я поднимаю эту тему перед «воспитателями». Стандартный ответ таков: «Конечно, они думают о том, чтобы, не дай Б-г, огонь не приблизился к иешиве! Все немедленно начинают молиться и читать Тегилим, чтобы иешива спаслась! И наверняка так думал и тот юноша, из лучших учеников Кельма». Да, говорю я им, но что думал в своем сердце тот юноша?
 
-Рабби Йерухам открывает нам тайны сердца того юноши, и это нечто потрясающее: «О, если бы сгорела и эта Талмуд-Тора! И я бы с наслаждением смог поехать домой, увидеть жену и детей». И это называется «выдающийся ученик иешивы»?! Это же кажется абсолютной испорченностью! Целая иешива сгорит в огне; не только скамьи, стендеры, книги, тфилин и свитки Торы. Всё, всё будет уничтожено! Речь ведь идет о деревянном здании и ужасном жаре огня. Он, конечно, не хочет, чтобы, упаси Б-г, кто-то погиб, но чтобы иешива сгорела... это нормально. Почему? 
+Рабби Йерухам открывает нам тайны сердца того юноши, и это нечто потрясающее: «О, если бы сгорела и эта Талмуд-Тора! И я бы с наслаждением смог поехать домой, увидеть жену и детей». И это называется «выдающийся ученик иешивы»?! Это же кажется абсолютной испорченностью! Целая иешива сгорит в огне; не только скамьи, стендеры, книги, тфилин и свитки Торы. Всё, всё будет уничтожено! Речь ведь идет о деревянном здании и ужасном жаре огня. Он, конечно, не хочет, чтобы, упаси Б-г, кто-то погиб, но чтобы иешива сгорела... это нормально. Почему?
 
 В те времена, когда уезжали учиться в иешиву, всё было не так, как в наши дни. Сегодня остаются на целый «зман» (семестр) в иешиве, но ездят каждую неделю домой, или каждые три-четыре дня в худшем случае. Тогда же уезжали в иешиву в месяце Элуль и оставались там до Песаха! И здесь речь идет об «аврехе» — человеке, который оставил дома жену и детей, жену, которая согласилась, чтобы он поехал учиться Торе. Но он скучает, и как он может внезапно вернуться домой посреди змана? Как он объяснит это?
 
@@ -189,7 +251,7 @@
 
 Люди находятся долгие месяцы в гостиницах; там есть красивая комната, бассейн и изысканная еда... Но они уже не в состоянии есть эту еду, они хотят просто яичницу — и дома. Неделя — это очень приятно, но через несколько месяцев это превращается в тюрьму! Чувствуем ли мы боль этих людей? Сопереживаем ли мы им?
 
-Душевные силы человека вводят нас в заблуждение. Часто мы чувствуем вещи нашей «внешней частью», но мы не проникаем внутрь, чтобы проверить, откуда это берется. Один из примеров этого, потрясший меня много лет назад, произошел во время праздника обрезания (брит мила), в котором я участвовал. 
+Душевные силы человека вводят нас в заблуждение. Часто мы чувствуем вещи нашей «внешней частью», но мы не проникаем внутрь, чтобы проверить, откуда это берется. Один из примеров этого, потрясший меня много лет назад, произошел во время праздника обрезания (брит мила), в котором я участвовал.
 
 Известно то, что написано в книгах: время, когда младенец плачет после обрезания, — это время, очень подходящее для молитвы; еврейский ребенок вступает в союз Авраама, нашего отца! На том обрезании, по всей видимости, моэль не был большим экспертом. Младенец плачет и плачет, а я молюсь... Я закончил упоминать свою семью, иешиву, весь район... Я продолжаю молиться и в сердце думаю: «Это ведь хорошее средство (сгула), а он плачет много... Это хорошее время».
 
@@ -274,65 +336,252 @@
 *Будем рады любым замечаниям и пояснениям!*</article>
   </main>
   <script>
+    const TTS_VOICE_KEY = 'lesson_tts_voice';
+    const TTS_RATE_KEY = 'lesson_tts_rate';
+    const TTS_ACTIVE_LESSON_KEY = 'lesson_tts_active_lesson';
+    const TTS_PLAYBACK_STATE_KEY = 'lesson_tts_playback_state';
     const lessonPassport = JSON.parse(document.getElementById('lesson-passport')?.textContent || '{}');
     const lessonTextEl = document.getElementById('lesson-text');
-    const statusEl = document.getElementById('tts-status');
+    const listenBtn = document.getElementById('listen-btn');
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsPanel = document.getElementById('tts-settings-panel');
+    const voiceEl = document.getElementById('tts-voice');
+    const voiceHelpModal = document.getElementById('voice-help-modal');
+    const voiceHelpClose = document.getElementById('voice-help-close');
     const speedEl = document.getElementById('tts-speed');
     const synth = window.speechSynthesis;
     let activeUtterance = null;
+    let availableVoices = [];
 
-    function setStatus(text) {
-      if (statusEl) statusEl.textContent = text;
+    function getLessonLang() {
+      return (lessonPassport.lang || 'ru') === 'he' ? 'he-IL' : ((lessonPassport.lang || 'ru') === 'en' ? 'en-US' : 'ru-RU');
+    }
+
+    function getPreferredVoiceUri() {
+      return localStorage.getItem(TTS_VOICE_KEY) || '';
+    }
+
+    function getPreferredRate() {
+      return localStorage.getItem(TTS_RATE_KEY) || '1';
+    }
+
+    function getLessonFilePath() {
+      const pathname = window.location.pathname || '';
+      const marker = '/Library/';
+      const index = pathname.indexOf(marker);
+      return index >= 0 ? pathname.slice(index + 1) : '';
+    }
+
+    function setPlaybackState(state) {
+      const lessonPath = getLessonFilePath();
+      if (lessonPath) localStorage.setItem(TTS_ACTIVE_LESSON_KEY, lessonPath);
+      localStorage.setItem(TTS_PLAYBACK_STATE_KEY, state);
+    }
+
+    function clearPlaybackState() {
+      localStorage.removeItem(TTS_ACTIVE_LESSON_KEY);
+      localStorage.removeItem(TTS_PLAYBACK_STATE_KEY);
+    }
+
+    function savePreferences() {
+      if (voiceEl) localStorage.setItem(TTS_VOICE_KEY, voiceEl.value || '');
+      if (speedEl) localStorage.setItem(TTS_RATE_KEY, speedEl.value || '1');
+    }
+
+    function updateListenButton() {
+      if (!listenBtn) return;
+      if (!synth) {
+        listenBtn.textContent = '×';
+        listenBtn.title = 'Озвучка недоступна';
+        listenBtn.disabled = true;
+        return;
+      }
+      if (synth.paused) {
+        listenBtn.textContent = '▶';
+        listenBtn.title = 'Продолжить';
+        return;
+      }
+      if (synth.speaking) {
+        listenBtn.textContent = '⏸';
+        listenBtn.title = 'Пауза';
+        return;
+      }
+      listenBtn.textContent = '▶';
+      listenBtn.title = 'Прослушать';
     }
 
     function getLessonText() {
       return (lessonTextEl?.innerText || lessonTextEl?.textContent || '').replace(/\s+/g, ' ').trim();
     }
 
-    function stopSpeech() {
+    function stopSpeech(updateButton = true) {
       if (synth) synth.cancel();
       activeUtterance = null;
-      setStatus('Остановлено');
+      clearPlaybackState();
+      if (updateButton) updateListenButton();
+    }
+
+    function getSelectedVoice() {
+      const selectedUri = voiceEl?.value || '';
+      return availableVoices.find(voice => voice.voiceURI === selectedUri) || null;
+    }
+
+    function pickFallbackVoice() {
+      const lessonLang = getLessonLang().toLowerCase();
+      return availableVoices.find(voice => (voice.lang || '').toLowerCase() === lessonLang)
+        || availableVoices.find(voice => (voice.lang || '').toLowerCase().startsWith(lessonLang.split('-')[0]))
+        || availableVoices[0]
+        || null;
+    }
+
+    function populateVoiceOptions() {
+      if (!voiceEl) return;
+      const lessonLang = getLessonLang().toLowerCase();
+      availableVoices = synth ? synth.getVoices().filter(voice => {
+        const voiceLang = (voice.lang || '').toLowerCase();
+        return voiceLang === lessonLang || voiceLang.startsWith(lessonLang.split('-')[0]);
+      }) : [];
+      const preferredUri = getPreferredVoiceUri();
+
+      if (!availableVoices.length) {
+        voiceEl.innerHTML = '<option value="">Голоса недоступны</option><option value="__voice_help__">Настройка голоса...</option>';
+        return;
+      }
+
+      voiceEl.innerHTML = availableVoices.map(voice => {
+        const label = `${voice.name} (${voice.lang})${voice.default ? ' — системный' : ''}`;
+        return `<option value="${voice.voiceURI}">${label}</option>`;
+      }).join('') + '<option value="__voice_help__">Настройка голоса...</option>';
+
+      const preferredVoice = availableVoices.find(voice => voice.voiceURI === preferredUri);
+      const fallbackVoice = pickFallbackVoice();
+      voiceEl.value = (preferredVoice || fallbackVoice)?.voiceURI || '';
+      savePreferences();
+    }
+
+    function toggleSettings(forceOpen) {
+      if (!settingsPanel || !settingsBtn) return;
+      const willOpen = typeof forceOpen === 'boolean' ? forceOpen : !settingsPanel.classList.contains('open');
+      settingsPanel.classList.toggle('open', willOpen);
+      settingsBtn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    }
+
+    function toggleVoiceHelp(forceOpen) {
+      if (!voiceHelpModal) return;
+      const willOpen = typeof forceOpen === 'boolean' ? forceOpen : !voiceHelpModal.classList.contains('open');
+      voiceHelpModal.classList.toggle('open', willOpen);
+      voiceHelpModal.setAttribute('aria-hidden', willOpen ? 'false' : 'true');
     }
 
     function playSpeech() {
       const text = getLessonText();
       if (!text || !synth) {
-        setStatus('Озвучка недоступна');
+        updateListenButton();
         return;
       }
+
       if (synth.speaking) synth.cancel();
+
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = (lessonPassport.lang || 'ru') === 'he' ? 'he-IL' : ((lessonPassport.lang || 'ru') === 'en' ? 'en-US' : 'ru-RU');
-      utterance.rate = parseFloat(speedEl?.value || '1');
-      utterance.onstart = () => setStatus('Читает…');
-      utterance.onend = () => setStatus('Готово');
-      utterance.onerror = () => setStatus('Ошибка озвучки');
+      const selectedVoice = getSelectedVoice() || pickFallbackVoice();
+      utterance.lang = selectedVoice?.lang || getLessonLang();
+      utterance.voice = selectedVoice || null;
+      utterance.rate = parseFloat(speedEl?.value || getPreferredRate() || '1');
+      utterance.onstart = () => {
+        setPlaybackState('playing');
+        updateListenButton();
+      };
+      utterance.onpause = () => {
+        setPlaybackState('paused');
+        updateListenButton();
+      };
+      utterance.onresume = () => {
+        setPlaybackState('playing');
+        updateListenButton();
+      };
+      utterance.onend = () => {
+        activeUtterance = null;
+        clearPlaybackState();
+        updateListenButton();
+      };
+      utterance.onerror = () => {
+        activeUtterance = null;
+        clearPlaybackState();
+        updateListenButton();
+      };
       activeUtterance = utterance;
+      savePreferences();
       synth.speak(utterance);
+      updateListenButton();
+    }
+
+    function toggleSpeech() {
+      if (!synth) {
+        updateListenButton();
+        return;
+      }
+      if (synth.speaking && !synth.paused) {
+        synth.pause();
+        setPlaybackState('paused');
+        updateListenButton();
+        return;
+      }
+      if (synth.paused) {
+        synth.resume();
+        setPlaybackState('playing');
+        updateListenButton();
+        return;
+      }
+      playSpeech();
     }
 
     document.getElementById('back-btn')?.addEventListener('click', () => {
-      window.location.href = '../index.html';
+      window.location.href = new URL('../../index.html', window.location.href).toString();
     });
-    document.getElementById('listen-btn')?.addEventListener('click', playSpeech);
-    document.getElementById('pause-btn')?.addEventListener('click', () => {
-      if (!synth) return;
-      if (synth.speaking && !synth.paused) {
-        synth.pause();
-        setStatus('Пауза');
-      } else if (synth.paused) {
-        synth.resume();
-        setStatus('Читает…');
+    listenBtn?.addEventListener('click', toggleSpeech);
+    settingsBtn?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      toggleSettings();
+    });
+    voiceEl?.addEventListener('change', () => {
+      if (voiceEl.value === '__voice_help__') {
+        const fallbackVoice = getSelectedVoice() || pickFallbackVoice();
+        voiceEl.value = fallbackVoice?.voiceURI || '';
+        toggleVoiceHelp(true);
+        return;
       }
-    });
-    document.getElementById('stop-btn')?.addEventListener('click', stopSpeech);
-    speedEl?.addEventListener('change', () => {
-      if (activeUtterance && synth?.speaking) {
-        stopSpeech();
+      savePreferences();
+      if (synth?.speaking || synth?.paused) {
+        stopSpeech(false);
         playSpeech();
       }
     });
+    speedEl?.addEventListener('change', () => {
+      savePreferences();
+      if (synth?.speaking || synth?.paused) {
+        stopSpeech(false);
+        playSpeech();
+      }
+    });
+    document.addEventListener('click', (event) => {
+      if (!settingsPanel?.contains(event.target) && event.target !== settingsBtn) {
+        toggleSettings(false);
+      }
+    });
+    voiceHelpClose?.addEventListener('click', () => toggleVoiceHelp(false));
+    voiceHelpModal?.addEventListener('click', (event) => {
+      if (event.target === voiceHelpModal) {
+        toggleVoiceHelp(false);
+      }
+    });
+
+    if (voiceEl) voiceEl.innerHTML = '<option value="">Загрузка голосов…</option>';
+    if (speedEl) speedEl.value = getPreferredRate();
+    populateVoiceOptions();
+    if (synth && typeof synth.onvoiceschanged !== 'undefined') {
+      synth.onvoiceschanged = populateVoiceOptions;
+    }
+    updateListenButton();
 
     if (new URLSearchParams(window.location.search).get('autoplay') === '1') {
       setTimeout(playSpeech, 200);

@@ -49,9 +49,12 @@
         .card-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
         .card-action {
             width: 32px; height: 32px; border-radius: 9px; border: 1px solid #d9e2ec; background: white; color: #51606f;
-            display: inline-flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; text-decoration: none;
         }
         .card-action[disabled] { opacity: 0.45; cursor: not-allowed; }
+        .card-action.active-audio {
+            background: #eef6ff; color: #2980b9; border-color: #bcd6f2;
+        }
 
         /* Стили для Дерева тем */
         .category-node { margin-left: 15px; margin-top: 5px; }
@@ -91,6 +94,8 @@
     let db = [];
     let rubricator = { roots: {} };
     let activeTagPath = null;
+    const TTS_ACTIVE_LESSON_KEY = 'lesson_tts_active_lesson';
+    const TTS_PLAYBACK_STATE_KEY = 'lesson_tts_playback_state';
 
     function norm(value) {
         return (value || '').toString().toLowerCase();
@@ -255,10 +260,50 @@
         window.location.href = target.toString();
     }
 
+    function getAutoplayHref(filePath) {
+        const target = new URL(filePath, window.location.href);
+        target.searchParams.set('autoplay', '1');
+        return target.toString();
+    }
+
+    function getActiveAudioState() {
+        return {
+            lesson: localStorage.getItem(TTS_ACTIVE_LESSON_KEY) || '',
+            state: localStorage.getItem(TTS_PLAYBACK_STATE_KEY) || ''
+        };
+    }
+
+    function clearActiveAudioState() {
+        localStorage.removeItem(TTS_ACTIVE_LESSON_KEY);
+        localStorage.removeItem(TTS_PLAYBACK_STATE_KEY);
+    }
+
+    function stopActiveAudioFromCard(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        try {
+            window.speechSynthesis?.cancel();
+        } catch (_) {}
+        clearActiveAudioState();
+        renderAll();
+    }
+
     function renderCardActions(item) {
+        const audioState = getActiveAudioState();
+        const isActiveLesson = audioState.lesson === item.file_path && (audioState.state === 'playing' || audioState.state === 'paused');
+        if (isActiveLesson) {
+            return `
+                <div class="card-actions">
+                    <a href="#" class="card-action active-audio" title="Остановить прослушивание" onclick="stopActiveAudioFromCard(event)">${audioState.state === 'playing' ? '⏸' : '▶'}</a>
+                    <button type="button" class="card-action" title="Печать" disabled>🖨</button>
+                    <button type="button" class="card-action" title="PDF" disabled>📄</button>
+                    <button type="button" class="card-action" title="Оригинал" disabled>🔗</button>
+                </div>
+            `;
+        }
         return `
             <div class="card-actions">
-                <button type="button" class="card-action" title="Прослушать" onclick="event.preventDefault(); event.stopPropagation(); openLessonAndAutoplay(${JSON.stringify(item.file_path)})">▶</button>
+                <a href="${getAutoplayHref(item.file_path)}" class="card-action" title="Прослушать" onclick="event.stopPropagation()">▶</a>
                 <button type="button" class="card-action" title="Печать" disabled>🖨</button>
                 <button type="button" class="card-action" title="PDF" disabled>📄</button>
                 <button type="button" class="card-action" title="Оригинал" disabled>🔗</button>
@@ -442,6 +487,16 @@
         .catch(err => {
             document.getElementById('recent-panel').innerHTML = "<div class='empty-state'>Не удалось загрузить library.json. Сначала выполните inventory/sync.</div>";
         });
+
+    window.addEventListener('storage', (event) => {
+        if ([TTS_ACTIVE_LESSON_KEY, TTS_PLAYBACK_STATE_KEY].includes(event.key)) {
+            renderAll();
+        }
+    });
+
+    window.addEventListener('pageshow', () => {
+        renderAll();
+    });
 </script>
 </body>
 </html>
