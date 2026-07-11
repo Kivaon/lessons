@@ -379,7 +379,10 @@
       if (!lessonTextEl) return '';
       const clone = lessonTextEl.cloneNode(true);
       clone.querySelectorAll('.tts-ignore, [aria-hidden="true"]').forEach((node) => node.remove());
-      return (clone.innerText || clone.textContent || '').replace(/\s+/g, ' ').trim();
+      return (clone.innerText || clone.textContent || '')
+        .replace(/[\\/|]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
     }
 
     function stopSpeech(updateButton = true) {
