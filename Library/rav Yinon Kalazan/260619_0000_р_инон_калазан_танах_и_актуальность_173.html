@@ -40,13 +40,31 @@
       white-space: nowrap;
       border: 0;
     }
-    .action-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; position: relative; }
+    .action-bar {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      margin-bottom: 18px; flex-wrap: wrap; position: relative;
+    }
+    .action-group {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .action-group.left-group {
+      flex: 1 1 420px; min-width: 280px;
+    }
+    .action-group.right-group {
+      justify-content: flex-end;
+    }
     .action-btn, .settings-select {
       border: 1px solid #d9e2ec; background: white; color: #425466; border-radius: 10px;
       min-width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;
       cursor: pointer; font-size: 16px;
     }
     .action-btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+    .timeline-wrap {
+      flex: 1 1 180px; min-width: 160px; display: flex; align-items: center;
+    }
+    .timeline-slider {
+      width: 100%; accent-color: #425466; cursor: pointer;
+    }
     .settings-panel {
       position: absolute; top: calc(100% + 8px); right: 0; z-index: 10; min-width: 250px;
       background: white; border: 1px solid #d9e2ec; border-radius: 12px; box-shadow: 0 10px 24px rgba(0,0,0,0.08);
@@ -76,13 +94,32 @@
 <body>
   <main>
     <div class="action-bar">
-      <button type="button" class="action-btn" id="back-btn" title="Назад">←</button>
-      <button type="button" class="action-btn" id="listen-btn" title="Прослушать">▶</button>
-      <button type="button" class="action-btn" id="settings-btn" title="Настройки озвучки" aria-expanded="false">⚙</button>
-      <button type="button" class="action-btn" id="print-btn" title="Печать" disabled>🖨</button>
-      <button type="button" class="action-btn" id="pdf-btn" title="PDF" disabled>📄</button>
-      <button type="button" class="action-btn" id="original-btn" title="Оригинал" disabled>🔗</button>
+      <div class="action-group left-group">
+        <button type="button" class="action-btn" id="back-btn" title="Назад в меню">←</button>
+        <button type="button" class="action-btn" id="rewind-btn" title="Назад на 10 секунд">↺10</button>
+        <button type="button" class="action-btn" id="listen-btn" title="Прослушать">▶</button>
+        <button type="button" class="action-btn" id="forward-btn" title="Вперёд на 10 секунд">10↻</button>
+        <div class="timeline-wrap">
+          <input type="range" id="tts-progress" class="timeline-slider" min="0" max="1000" value="0" step="1" title="Позиция озвучки">
+        </div>
+        <button type="button" class="action-btn" id="settings-btn" title="Настройки озвучки" aria-expanded="false">⚙</button>
+      </div>
+      <div class="action-group right-group">
+        <button type="button" class="action-btn" id="print-btn" title="Печать" disabled>🖨</button>
+        <button type="button" class="action-btn" id="pdf-btn" title="PDF" disabled>📄</button>
+        <button type="button" class="action-btn" id="original-btn" title="Оригинал" disabled>🔗</button>
+      </div>
       <div class="settings-panel" id="tts-settings-panel">
+        <div class="settings-row">
+          <label class="settings-label" for="tts-voice-filter">Язык голосов</label>
+          <select id="tts-voice-filter" class="settings-select" title="Язык голосов">
+            <option value="lesson">Язык урока</option>
+            <option value="ru">Русский</option>
+            <option value="en">English</option>
+            <option value="he">עברית</option>
+            <option value="all">Все</option>
+          </select>
+        </div>
         <div class="settings-row">
           <label class="settings-label" for="tts-voice">Голос</label>
           <select id="tts-voice" class="settings-select" title="Голос"></select>
@@ -253,21 +290,33 @@
   </main>
   <script>
     const TTS_VOICE_KEY = 'lesson_tts_voice';
+    const TTS_VOICE_FILTER_KEY = 'lesson_tts_voice_filter';
     const TTS_RATE_KEY = 'lesson_tts_rate';
     const TTS_ACTIVE_LESSON_KEY = 'lesson_tts_active_lesson';
     const TTS_PLAYBACK_STATE_KEY = 'lesson_tts_playback_state';
     const lessonPassport = JSON.parse(document.getElementById('lesson-passport')?.textContent || '{}');
     const lessonTextEl = document.getElementById('lesson-text');
     const listenBtn = document.getElementById('listen-btn');
+    const rewindBtn = document.getElementById('rewind-btn');
+    const forwardBtn = document.getElementById('forward-btn');
+    const progressEl = document.getElementById('tts-progress');
     const settingsBtn = document.getElementById('settings-btn');
     const settingsPanel = document.getElementById('tts-settings-panel');
+    const voiceFilterEl = document.getElementById('tts-voice-filter');
     const voiceEl = document.getElementById('tts-voice');
     const voiceHelpModal = document.getElementById('voice-help-modal');
     const voiceHelpClose = document.getElementById('voice-help-close');
     const speedEl = document.getElementById('tts-speed');
     const synth = window.speechSynthesis;
     let activeUtterance = null;
+    let allVoices = [];
     let availableVoices = [];
+    let speechTextCache = '';
+    let currentCharIndex = 0;
+    let lastBoundaryAt = 0;
+    let isSeeking = false;
+    const SEEK_STEP_SECONDS = 10;
+    const BASE_CHARS_PER_SECOND = 14;
 
     function getLessonLang() {
       return (lessonPassport.lang || 'ru') === 'he' ? 'he-IL' : ((lessonPassport.lang || 'ru') === 'en' ? 'en-US' : 'ru-RU');
@@ -275,6 +324,10 @@
 
     function getPreferredVoiceUri() {
       return localStorage.getItem(TTS_VOICE_KEY) || '';
+    }
+
+    function getPreferredVoiceFilter() {
+      return localStorage.getItem(TTS_VOICE_FILTER_KEY) || 'lesson';
     }
 
     function getPreferredRate() {
@@ -300,8 +353,44 @@
     }
 
     function savePreferences() {
+      if (voiceFilterEl) localStorage.setItem(TTS_VOICE_FILTER_KEY, voiceFilterEl.value || 'lesson');
       if (voiceEl) localStorage.setItem(TTS_VOICE_KEY, voiceEl.value || '');
       if (speedEl) localStorage.setItem(TTS_RATE_KEY, speedEl.value || '1');
+    }
+
+    function getCurrentRate() {
+      return parseFloat(speedEl?.value || getPreferredRate() || '1') || 1;
+    }
+
+    function normalizeVoiceLang(lang) {
+      return (lang || '').toLowerCase();
+    }
+
+    function getVoiceFilterValue() {
+      return voiceFilterEl?.value || getPreferredVoiceFilter() || 'lesson';
+    }
+
+    function voiceMatchesFilter(voice, filterValue) {
+      const voiceLang = normalizeVoiceLang(voice?.lang);
+      const lessonLang = getLessonLang().toLowerCase();
+      const lessonRoot = lessonLang.split('-')[0];
+
+      if (filterValue === 'all') return true;
+      if (filterValue === 'lesson') {
+        return voiceLang === lessonLang || voiceLang.startsWith(lessonRoot);
+      }
+      if (filterValue === 'ru') return voiceLang.startsWith('ru');
+      if (filterValue === 'en') return voiceLang.startsWith('en');
+      if (filterValue === 'he') return voiceLang.startsWith('he') || voiceLang.startsWith('iw');
+      return true;
+    }
+
+    function getVoiceFilterLabel(filterValue) {
+      if (filterValue === 'ru') return 'Русский';
+      if (filterValue === 'en') return 'English';
+      if (filterValue === 'he') return 'עברית';
+      if (filterValue === 'all') return 'Все';
+      return 'Язык урока';
     }
 
     function updateListenButton() {
@@ -326,6 +415,13 @@
       listenBtn.title = 'Прослушать';
     }
 
+    function updateProgressUI() {
+      if (!progressEl) return;
+      const totalLength = Math.max(speechTextCache.length, 1);
+      const nextValue = Math.max(0, Math.min(1000, Math.round((currentCharIndex / totalLength) * 1000)));
+      if (!isSeeking) progressEl.value = String(nextValue);
+    }
+
     function getLessonText() {
       if (!lessonTextEl) return '';
       const clone = lessonTextEl.cloneNode(true);
@@ -337,7 +433,40 @@
       if (synth) synth.cancel();
       activeUtterance = null;
       clearPlaybackState();
+      lastBoundaryAt = 0;
       if (updateButton) updateListenButton();
+    }
+
+    function clampCharIndex(index) {
+      return Math.max(0, Math.min(index, Math.max(speechTextCache.length - 1, 0)));
+    }
+
+    function estimateCharsForSeconds(seconds) {
+      return Math.round(seconds * BASE_CHARS_PER_SECOND * getCurrentRate());
+    }
+
+    function normalizeSeekIndex(index) {
+      const target = clampCharIndex(index);
+      if (!speechTextCache) return 0;
+      if (target <= 0) return 0;
+      const prevSpace = speechTextCache.lastIndexOf(' ', target);
+      return prevSpace >= 0 ? prevSpace + 1 : target;
+    }
+
+    function seekToChar(index, autoPlay = true) {
+      speechTextCache = speechTextCache || getLessonText();
+      currentCharIndex = normalizeSeekIndex(index);
+      updateProgressUI();
+      if (synth?.speaking || synth?.paused) stopSpeech(false);
+      if (autoPlay) playSpeech(currentCharIndex);
+      else updateListenButton();
+    }
+
+    function seekBySeconds(deltaSeconds) {
+      speechTextCache = speechTextCache || getLessonText();
+      if (!speechTextCache) return;
+      const deltaChars = estimateCharsForSeconds(deltaSeconds);
+      seekToChar(currentCharIndex + deltaChars, true);
     }
 
     function getSelectedVoice() {
@@ -347,23 +476,28 @@
 
     function pickFallbackVoice() {
       const lessonLang = getLessonLang().toLowerCase();
-      return availableVoices.find(voice => (voice.lang || '').toLowerCase() === lessonLang)
-        || availableVoices.find(voice => (voice.lang || '').toLowerCase().startsWith(lessonLang.split('-')[0]))
+      const filterValue = getVoiceFilterValue();
+      const byFilter = availableVoices;
+      const preferredYuri = byFilter.find(voice => /yuri/i.test(`${voice.name || ''} ${voice.voiceURI || ''}`));
+      return preferredYuri
+        || byFilter.find(voice => (voice.lang || '').toLowerCase() === lessonLang)
+        || byFilter.find(voice => (voice.lang || '').toLowerCase().startsWith(lessonLang.split('-')[0]))
+        || allVoices.find(voice => voiceMatchesFilter(voice, filterValue))
         || availableVoices[0]
+        || allVoices[0]
         || null;
     }
 
     function populateVoiceOptions() {
       if (!voiceEl) return;
-      const lessonLang = getLessonLang().toLowerCase();
-      availableVoices = synth ? synth.getVoices().filter(voice => {
-        const voiceLang = (voice.lang || '').toLowerCase();
-        return voiceLang === lessonLang || voiceLang.startsWith(lessonLang.split('-')[0]);
-      }) : [];
+      const filterValue = getVoiceFilterValue();
+      allVoices = synth ? synth.getVoices().slice() : [];
+      availableVoices = allVoices.filter(voice => voiceMatchesFilter(voice, filterValue));
       const preferredUri = getPreferredVoiceUri();
 
       if (!availableVoices.length) {
-        voiceEl.innerHTML = '<option value="">Голоса недоступны</option><option value="__voice_help__">Настройка голоса...</option>';
+        const emptyLabel = `Голоса недоступны: ${getVoiceFilterLabel(filterValue)}`;
+        voiceEl.innerHTML = `<option value="">${emptyLabel}</option><option value="__voice_help__">Настройка голоса...</option>`;
         return;
       }
 
@@ -376,6 +510,16 @@
       const fallbackVoice = pickFallbackVoice();
       voiceEl.value = (preferredVoice || fallbackVoice)?.voiceURI || '';
       savePreferences();
+    }
+
+    function scheduleVoiceReload(attempt = 0) {
+      if (!synth) return;
+      const voices = synth.getVoices();
+      if (voices.length || attempt >= 6) {
+        populateVoiceOptions();
+        return;
+      }
+      window.setTimeout(() => scheduleVoiceReload(attempt + 1), 250 * (attempt + 1));
     }
 
     function toggleSettings(forceOpen) {
@@ -392,8 +536,9 @@
       voiceHelpModal.setAttribute('aria-hidden', willOpen ? 'false' : 'true');
     }
 
-    function playSpeech() {
-      const text = getLessonText();
+    function playSpeech(startCharIndex = currentCharIndex) {
+      speechTextCache = getLessonText();
+      const text = speechTextCache;
       if (!text || !synth) {
         updateListenButton();
         return;
@@ -401,13 +546,26 @@
 
       if (synth.speaking) synth.cancel();
 
-      const utterance = new SpeechSynthesisUtterance(text);
+      currentCharIndex = normalizeSeekIndex(startCharIndex);
+      const remainingText = text.slice(currentCharIndex).trimStart();
+      const skippedChars = text.length - remainingText.length - currentCharIndex;
+      currentCharIndex += Math.max(skippedChars, 0);
+      if (!remainingText) {
+        currentCharIndex = 0;
+        updateProgressUI();
+        updateListenButton();
+        return;
+      }
+
+      const utterance = new SpeechSynthesisUtterance(remainingText);
       const selectedVoice = getSelectedVoice() || pickFallbackVoice();
       utterance.lang = selectedVoice?.lang || getLessonLang();
       utterance.voice = selectedVoice || null;
-      utterance.rate = parseFloat(speedEl?.value || getPreferredRate() || '1');
+      utterance.rate = getCurrentRate();
       utterance.onstart = () => {
+        lastBoundaryAt = Date.now();
         setPlaybackState('playing');
+        updateProgressUI();
         updateListenButton();
       };
       utterance.onpause = () => {
@@ -420,7 +578,9 @@
       };
       utterance.onend = () => {
         activeUtterance = null;
+        currentCharIndex = speechTextCache.length;
         clearPlaybackState();
+        updateProgressUI();
         updateListenButton();
       };
       utterance.onerror = () => {
@@ -428,9 +588,17 @@
         clearPlaybackState();
         updateListenButton();
       };
+      utterance.onboundary = (event) => {
+        if (typeof event.charIndex === 'number') {
+          currentCharIndex = normalizeSeekIndex(startCharIndex + event.charIndex);
+          lastBoundaryAt = Date.now();
+          updateProgressUI();
+        }
+      };
       activeUtterance = utterance;
       savePreferences();
       synth.speak(utterance);
+      updateProgressUI();
       updateListenButton();
     }
 
@@ -451,13 +619,15 @@
         updateListenButton();
         return;
       }
-      playSpeech();
+      playSpeech(currentCharIndex);
     }
 
     document.getElementById('back-btn')?.addEventListener('click', () => {
       window.location.href = new URL('../../index.html', window.location.href).toString();
     });
     listenBtn?.addEventListener('click', toggleSpeech);
+    rewindBtn?.addEventListener('click', () => seekBySeconds(-SEEK_STEP_SECONDS));
+    forwardBtn?.addEventListener('click', () => seekBySeconds(SEEK_STEP_SECONDS));
     settingsBtn?.addEventListener('click', (event) => {
       event.stopPropagation();
       toggleSettings();
@@ -475,12 +645,29 @@
         playSpeech();
       }
     });
-    speedEl?.addEventListener('change', () => {
+    voiceFilterEl?.addEventListener('change', () => {
       savePreferences();
+      populateVoiceOptions();
       if (synth?.speaking || synth?.paused) {
         stopSpeech(false);
         playSpeech();
       }
+    });
+    speedEl?.addEventListener('change', () => {
+      savePreferences();
+      if (synth?.speaking || synth?.paused) {
+        stopSpeech(false);
+        playSpeech(currentCharIndex);
+      }
+    });
+    progressEl?.addEventListener('input', () => {
+      isSeeking = true;
+    });
+    progressEl?.addEventListener('change', () => {
+      isSeeking = false;
+      speechTextCache = speechTextCache || getLessonText();
+      const targetIndex = Math.round((parseInt(progressEl.value || '0', 10) / 1000) * Math.max(speechTextCache.length, 1));
+      seekToChar(targetIndex, true);
     });
     document.addEventListener('click', (event) => {
       if (!settingsPanel?.contains(event.target) && event.target !== settingsBtn) {
@@ -495,15 +682,22 @@
     });
 
     if (voiceEl) voiceEl.innerHTML = '<option value="">Загрузка голосов…</option>';
+    if (voiceFilterEl) voiceFilterEl.value = getPreferredVoiceFilter();
     if (speedEl) speedEl.value = getPreferredRate();
+    speechTextCache = getLessonText();
+    updateProgressUI();
     populateVoiceOptions();
+    scheduleVoiceReload();
     if (synth && typeof synth.onvoiceschanged !== 'undefined') {
-      synth.onvoiceschanged = populateVoiceOptions;
+      synth.onvoiceschanged = () => {
+        populateVoiceOptions();
+        scheduleVoiceReload();
+      };
     }
     updateListenButton();
 
     if (new URLSearchParams(window.location.search).get('autoplay') === '1') {
-      setTimeout(playSpeech, 200);
+      setTimeout(() => playSpeech(currentCharIndex), 200);
     }
   </script>
 </body>
