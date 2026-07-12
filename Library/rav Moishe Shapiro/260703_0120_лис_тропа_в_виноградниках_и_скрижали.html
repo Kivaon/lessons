@@ -95,9 +95,9 @@
     <div class="action-bar">
       <div class="action-group left-group">
         <button type="button" class="action-btn" id="back-btn" title="Назад в меню">←</button>
-        <button type="button" class="action-btn" id="rewind-btn" title="Назад на 10 секунд">↺10</button>
+        <button type="button" class="action-btn" id="rewind-btn" title="Назад на 10 секунд">↺</button>
         <button type="button" class="action-btn" id="listen-btn" title="Прослушать">▶</button>
-        <button type="button" class="action-btn" id="forward-btn" title="Вперёд на 10 секунд">10↻</button>
+        <button type="button" class="action-btn" id="forward-btn" title="Вперёд на 10 секунд">↻</button>
         <div class="timeline-wrap">
           <input type="range" id="tts-progress" class="timeline-slider" min="0" max="1000" value="0" step="1" title="Позиция озвучки">
         </div>
@@ -139,33 +139,33 @@
     <div class="voice-help" id="voice-help-modal" aria-hidden="true">
       <div class="voice-help-dialog">
         <h3>🎧 Как включить приятный мужской голос для озвучки уроков?</h3>
-        <p>По умолчанию ваша система использует стандартный женский голос. Чтобы переключить озвучку на мужской баритон, выполните простую разовую настройку для вашего устройства:</p>
+        <p>По умолчанию устройство может использовать стандартный женский голос. Если хотите более глубокое и приятное мужское звучание, выполните простую разовую настройку для своей платформы.</p>
 
         <h4>Apple (Mac / iPhone / iPad)</h4>
         <ol>
-          <li>Откройте <strong>Системные настройки → Универсальный доступ → Устный контент</strong>.</li>
-          <li>В пункте <strong>Системный голос</strong> выберите <strong>Управление голосами...</strong></li>
-          <li>Найдите <strong>Русский</strong> и скачайте голос <strong>Yuri (Юрий)</strong>. Рекомендуется версия <strong>«Улучшенный»</strong>.</li>
-          <li>Обновите эту страницу.</li>
+          <li>Откройте <strong>Системные настройки (System Settings / Settings)</strong> → <strong>Универсальный доступ (Accessibility)</strong> → <strong>Устный контент (Spoken Content)</strong>.</li>
+          <li>В пункте <strong>Системный голос (System Voice)</strong> выберите <strong>Управление голосами... (Manage Voices...)</strong>.</li>
+          <li>Найдите <strong>Русский (Russian)</strong> и скачайте голос <strong>Yuri (Юрий)</strong>. Лучше всего подходит версия <strong>«Улучшенный» (Premium / Enhanced)</strong>.</li>
+          <li>После установки просто обновите страницу урока.</li>
         </ol>
 
         <h4>Windows 10 / 11</h4>
         <ol>
-          <li>Откройте <strong>Параметры (Win + I) → Время и язык → Распознавание речи</strong>.</li>
-          <li>В разделе <strong>Голоса</strong> убедитесь, что установлен пакет для русского языка.</li>
-          <li>Выберите в качестве стандартного голоса <strong>Microsoft Pavel (Павел)</strong>.</li>
-          <li>Перезапустите браузер и обновите страницу.</li>
+          <li>Откройте <strong>Параметры (Settings, Win + I)</strong> → <strong>Время и язык (Time &amp; language)</strong> → <strong>Распознавание речи (Speech)</strong>.</li>
+          <li>В разделе <strong>Голоса (Voices)</strong> убедитесь, что установлен пакет для русского языка.</li>
+          <li>Выберите в качестве системного голоса <strong>Microsoft Pavel (Павел)</strong>.</li>
+          <li>Перезапустите браузер и затем обновите страницу урока.</li>
         </ol>
 
         <h4>Android (Смартфоны)</h4>
         <ol>
-          <li>Зайдите в <strong>Настройки → Расширенные настройки (или Доступность) → Язык и ввод → Синтез речи</strong>.</li>
-          <li>Убедитесь, что выбран <strong>Синтезатор речи Google</strong>. Нажмите на иконку шестерёнки рядом с ним.</li>
-          <li>Выберите <strong>Установка голосовых данных → Русский</strong>.</li>
-          <li>Выберите мужской вариант (обычно это <strong>Голос №2</strong>, <strong>№3</strong> или голос с маркировкой <strong>male</strong>).</li>
+          <li>Откройте <strong>Настройки (Settings)</strong> → <strong>Расширенные настройки (Additional settings)</strong> или <strong>Доступность (Accessibility)</strong> → <strong>Язык и ввод (Languages &amp; input)</strong> → <strong>Синтез речи (Text-to-speech output)</strong>.</li>
+          <li>Проверьте, что выбран <strong>Синтезатор речи Google (Speech Services by Google)</strong>, и нажмите на иконку шестерёнки рядом с ним.</li>
+          <li>Выберите <strong>Установка голосовых данных (Install voice data)</strong> → <strong>Русский (Russian)</strong>.</li>
+          <li>Выберите мужской вариант — обычно это <strong>Голос №2</strong>, <strong>Голос №3</strong> или голос с пометкой <strong>male</strong>.</li>
         </ol>
 
-        <p>После выполнения настройки просто обновите эту страницу, и сайт автоматически переключится на новый голос.</p>
+        <p>После завершения настройки обновите страницу — сайт автоматически подхватит новый голос, если он доступен браузеру.</p>
         <button type="button" class="action-btn voice-help-close" id="voice-help-close">Понятно</button>
       </div>
     </div>
@@ -380,6 +380,7 @@
       const clone = lessonTextEl.cloneNode(true);
       clone.querySelectorAll('.tts-ignore, [aria-hidden="true"]').forEach((node) => node.remove());
       return (clone.innerText || clone.textContent || '')
+        .replace(/[«»“”„‟‹›'"`]+/g, ' ')
         .replace(/[\\/|]+/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
