@@ -273,6 +273,10 @@
         };
     }
 
+    function isAudioStateActive(audioState, item) {
+        return audioState.lesson === item.file_path && (audioState.state === 'playing' || audioState.state === 'paused');
+    }
+
     function clearActiveAudioState() {
         localStorage.removeItem(TTS_ACTIVE_LESSON_KEY);
         localStorage.removeItem(TTS_PLAYBACK_STATE_KEY);
@@ -290,7 +294,7 @@
 
     function renderCardActions(item) {
         const audioState = getActiveAudioState();
-        const isActiveLesson = audioState.lesson === item.file_path && (audioState.state === 'playing' || audioState.state === 'paused');
+        const isActiveLesson = isAudioStateActive(audioState, item);
         if (isActiveLesson) {
             return `
                 <div class="card-actions">
@@ -495,6 +499,10 @@
     });
 
     window.addEventListener('pageshow', () => {
+        renderAll();
+    });
+
+    window.addEventListener('focus', () => {
         renderAll();
     });
 </script>

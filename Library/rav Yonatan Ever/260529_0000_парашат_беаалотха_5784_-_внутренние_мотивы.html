@@ -339,6 +339,30 @@
       localStorage.setItem(TTS_PLAYBACK_STATE_KEY, state);
     }
 
+    function syncPlaybackState() {
+      if (!synth) {
+        clearPlaybackState();
+        return;
+      }
+
+      const lessonPath = getLessonFilePath();
+      if (!lessonPath) return;
+
+      if (synth.speaking && !synth.paused) {
+        localStorage.setItem(TTS_ACTIVE_LESSON_KEY, lessonPath);
+        localStorage.setItem(TTS_PLAYBACK_STATE_KEY, 'playing');
+        return;
+      }
+
+      if (synth.paused) {
+        localStorage.setItem(TTS_ACTIVE_LESSON_KEY, lessonPath);
+        localStorage.setItem(TTS_PLAYBACK_STATE_KEY, 'paused');
+        return;
+      }
+
+      clearPlaybackState();
+    }
+
     function clearPlaybackState() {
       localStorage.removeItem(TTS_ACTIVE_LESSON_KEY);
       localStorage.removeItem(TTS_PLAYBACK_STATE_KEY);
@@ -668,6 +692,13 @@
     document.addEventListener('click', (event) => {
       if (!settingsPanel?.contains(event.target) && event.target !== settingsBtn) {
         toggleSettings(false);
+      }
+    });
+    window.addEventListener('pagehide', syncPlaybackState);
+    window.addEventListener('beforeunload', syncPlaybackState);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        syncPlaybackState();
       }
     });
     voiceHelpClose?.addEventListener('click', () => toggleVoiceHelp(false));
