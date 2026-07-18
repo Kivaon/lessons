@@ -74,6 +74,17 @@
     .settings-row:last-child { margin-bottom: 0; }
     .settings-label { font-size: 12px; color: #6b7a89; }
     .settings-select { width: 100%; justify-content: flex-start; padding: 0 10px; min-width: 0; }
+    .tts-status {
+      margin: 0 0 14px;
+      font-size: 13px;
+      color: #8a5a00;
+      background: #fff7e6;
+      border: 1px solid #f3d19c;
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: none;
+    }
+    .tts-status.visible { display: block; }
   </style>
 </head>
 <body>
@@ -122,6 +133,7 @@
         </div>
       </div>
     </div>
+    <div class="tts-status" id="tts-status" role="status" aria-live="polite"></div>
     <div class="voice-help" id="voice-help-modal" aria-hidden="true">
       <div class="voice-help-dialog">
         <h3>🎧 Как включить приятный мужской голос для озвучки уроков?</h3>
@@ -178,6 +190,7 @@
     const voiceHelpModal = document.getElementById('voice-help-modal');
     const voiceHelpClose = document.getElementById('voice-help-close');
     const speedEl = document.getElementById('tts-speed');
+    const ttsStatusEl = document.getElementById('tts-status');
     const synth = window.speechSynthesis;
     let activeUtterance = null;
     let allVoices = [];
@@ -186,6 +199,7 @@
     let currentCharIndex = 0;
     let lastBoundaryAt = 0;
     let isSeeking = false;
+    let speechStartTimer = null;
     const SEEK_STEP_SECONDS = 10;
     const BASE_CHARS_PER_SECOND = 14;
 
@@ -310,6 +324,23 @@
       listenBtn.title = 'Прослушать';
     }
 
+    function showTtsStatus(message) {
+      if (!ttsStatusEl) return;
+      ttsStatusEl.textContent = message || '';
+      ttsStatusEl.classList.toggle('visible', Boolean(message));
+    }
+
+    function clearTtsStatus() {
+      showTtsStatus('');
+    }
+
+    function clearSpeechStartTimer() {
+      if (speechStartTimer) {
+        window.clearTimeout(speechStartTimer);
+        speechStartTimer = null;
+      }
+    }
+
     function updateProgressUI() {
       if (!progressEl) return;
       const totalLength = Math.max(speechTextCache.length, 1);
@@ -329,6 +360,7 @@
     }
 
     function stopSpeech(updateButton = true) {
+      clearSpeechStartTimer();
       if (synth) synth.cancel();
       activeUtterance = null;
       clearPlaybackState();
@@ -387,6 +419,10 @@
         || null;
     }
 
+    function canAssignVoice(voice) {
+      return Boolean(voice && voice.voiceURI && voice.name);
+    }
+
     function populateVoiceOptions() {
       if (!voiceEl) return;
       const filterValue = getVoiceFilterValue();
@@ -439,9 +475,13 @@
       speechTextCache = getLessonText();
       const text = speechTextCache;
       if (!text || !synth) {
+        showTtsStatus('Озвучка недоступна в этом браузере.');
         updateListenButton();
         return;
       }
+
+      clearTtsStatus();
+      clearSpeechStartTimer();
 
       if (synth.speaking) synth.cancel();
 
@@ -459,13 +499,17 @@
       const utterance = new SpeechSynthesisUtterance(remainingText);
       const selectedVoice = getSelectedVoice() || pickFallbackVoice();
       utterance.lang = selectedVoice?.lang || getLessonLang();
-      utterance.voice = selectedVoice || null;
+      if (canAssignVoice(selectedVoice)) {
+        utterance.voice = selectedVoice;
+      }
       utterance.rate = getCurrentRate();
       utterance.onstart = () => {
+        clearSpeechStartTimer();
         lastBoundaryAt = Date.now();
         setPlaybackState('playing');
         updateProgressUI();
         updateListenButton();
+        clearTtsStatus();
       };
       utterance.onpause = () => {
         setPlaybackState('paused');
@@ -476,6 +520,7 @@
         updateListenButton();
       };
       utterance.onend = () => {
+        clearSpeechStartTimer();
         activeUtterance = null;
         currentCharIndex = speechTextCache.length;
         clearPlaybackState();
@@ -483,9 +528,11 @@
         updateListenButton();
       };
       utterance.onerror = () => {
+        clearSpeechStartTimer();
         activeUtterance = null;
         clearPlaybackState();
         updateListenButton();
+        showTtsStatus('Не удалось запустить озвучку. Попробуйте ещё раз или выберите другой голос.');
       };
       utterance.onboundary = (event) => {
         if (typeof event.charIndex === 'number') {
@@ -496,16 +543,46 @@
       };
       activeUtterance = utterance;
       savePreferences();
-      synth.speak(utterance);
+      try {
+        synth.speak(utterance);
+      } catch (_) {
+        clearSpeechStartTimer();
+        activeUtterance = null;
+        showTtsStatus('Браузер не смог запустить озвучку. Попробуйте ещё раз.');
+        updateListenButton();
+        return;
+      }
+      speechStartTimer = window.setTimeout(() => {
+        if (!synth.speaking && !synth.paused) {
+          const fallbackUtterance = new SpeechSynthesisUtterance(remainingText);
+          fallbackUtterance.lang = getLessonLang();
+          fallbackUtterance.rate = getCurrentRate();
+          fallbackUtterance.onstart = utterance.onstart;
+          fallbackUtterance.onpause = utterance.onpause;
+          fallbackUtterance.onresume = utterance.onresume;
+          fallbackUtterance.onend = utterance.onend;
+          fallbackUtterance.onerror = utterance.onerror;
+          fallbackUtterance.onboundary = utterance.onboundary;
+          activeUtterance = fallbackUtterance;
+          try {
+            synth.cancel();
+            synth.speak(fallbackUtterance);
+          } catch (_) {
+            showTtsStatus('Озвучка не стартовала. Возможно, в браузере недоступны системные голоса.');
+          }
+        }
+      }, 350);
       updateProgressUI();
       updateListenButton();
     }
 
     function toggleSpeech() {
       if (!synth) {
+        showTtsStatus('Озвучка недоступна в этом браузере.');
         updateListenButton();
         return;
       }
+      clearTtsStatus();
       if (synth.speaking && !synth.paused) {
         synth.pause();
         setPlaybackState('paused');
