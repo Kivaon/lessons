@@ -236,13 +236,16 @@
     let allVoices = [];
     let availableVoices = [];
     let speechTextCache = '';
+    let currentChunkStart = 0;
     let currentCharIndex = 0;
     let lastBoundaryAt = 0;
     let isSeeking = false;
     let speechStartTimer = null;
     let lastManualPlayAttemptAt = 0;
+    let playbackSessionId = 0;
     const SEEK_STEP_SECONDS = 10;
     const BASE_CHARS_PER_SECOND = 14;
+    const MAX_CHUNK_CHARS = 900;
 
     function getLessonLang() {
       return (lessonPassport.lang || 'ru') === 'he' ? 'he-IL' : ((lessonPassport.lang || 'ru') === 'en' ? 'en-US' : 'ru-RU');
@@ -382,6 +385,33 @@
       }
     }
 
+    function splitTextForSpeech(text, startIndex) {
+      const safeStart = Math.max(0, Math.min(startIndex || 0, Math.max(text.length - 1, 0)));
+      if (!text || safeStart >= text.length) {
+        return { chunkText: '', chunkStart: safeStart, nextIndex: safeStart };
+      }
+
+      let chunkEnd = Math.min(text.length, safeStart + MAX_CHUNK_CHARS);
+      if (chunkEnd < text.length) {
+        const punctuationMatch = text.slice(safeStart, chunkEnd).match(/[.!?…;:](?=[^.!?…;:]*$)/);
+        if (punctuationMatch && typeof punctuationMatch.index === 'number') {
+          chunkEnd = safeStart + punctuationMatch.index + 1;
+        } else {
+          const lastSpace = text.lastIndexOf(' ', chunkEnd);
+          if (lastSpace > safeStart + 80) {
+            chunkEnd = lastSpace;
+          }
+        }
+      }
+
+      const chunkText = text.slice(safeStart, chunkEnd).trim();
+      return {
+        chunkText,
+        chunkStart: safeStart,
+        nextIndex: chunkEnd,
+      };
+    }
+
     function markManualPlayAttempt() {
       lastManualPlayAttemptAt = Date.now();
       if (listenBtn) {
@@ -410,8 +440,10 @@
 
     function stopSpeech(updateButton = true) {
       clearSpeechStartTimer();
+      playbackSessionId += 1;
       if (synth) synth.cancel();
       activeUtterance = null;
+      currentChunkStart = 0;
       clearPlaybackState();
       lastBoundaryAt = 0;
       if (updateButton) updateListenButton();
@@ -520,7 +552,7 @@
       voiceHelpModal.setAttribute('aria-hidden', willOpen ? 'false' : 'true');
     }
 
-    function playSpeech(startCharIndex = currentCharIndex) {
+    function playSpeech(startCharIndex = currentCharIndex, sessionId = null) {
       speechTextCache = getLessonText();
       const text = speechTextCache;
       if (!text || !synth) {
@@ -533,12 +565,17 @@
       clearSpeechStartTimer();
       markManualPlayAttempt();
 
+      if (sessionId === null) {
+        playbackSessionId += 1;
+        sessionId = playbackSessionId;
+      }
+
       if (synth.speaking) synth.cancel();
 
       currentCharIndex = normalizeSeekIndex(startCharIndex);
-      const remainingText = text.slice(currentCharIndex).trimStart();
-      const skippedChars = text.length - remainingText.length - currentCharIndex;
-      currentCharIndex += Math.max(skippedChars, 0);
+      const chunk = splitTextForSpeech(text, currentCharIndex);
+      const remainingText = chunk.chunkText;
+      currentChunkStart = chunk.chunkStart;
       if (!remainingText) {
         currentCharIndex = 0;
         updateProgressUI();
@@ -554,6 +591,7 @@
       }
       utterance.rate = getCurrentRate();
       utterance.onstart = () => {
+        if (sessionId !== playbackSessionId) return;
         clearSpeechStartTimer();
         lastBoundaryAt = Date.now();
         setPlaybackState('playing');
@@ -562,22 +600,32 @@
         clearTtsStatus();
       };
       utterance.onpause = () => {
+        if (sessionId !== playbackSessionId) return;
         setPlaybackState('paused');
         updateListenButton();
       };
       utterance.onresume = () => {
+        if (sessionId !== playbackSessionId) return;
         setPlaybackState('playing');
         updateListenButton();
       };
       utterance.onend = () => {
+        if (sessionId !== playbackSessionId) return;
         clearSpeechStartTimer();
         activeUtterance = null;
+        currentCharIndex = chunk.nextIndex;
+        if (chunk.nextIndex < speechTextCache.length) {
+          playSpeech(chunk.nextIndex, sessionId);
+          return;
+        }
         currentCharIndex = speechTextCache.length;
+        currentChunkStart = 0;
         clearPlaybackState();
         updateProgressUI();
         updateListenButton();
       };
       utterance.onerror = () => {
+        if (sessionId !== playbackSessionId) return;
         clearSpeechStartTimer();
         activeUtterance = null;
         clearPlaybackState();
@@ -585,8 +633,9 @@
         showTtsStatus('Не удалось запустить озвучку. Попробуйте ещё раз или выберите другой голос.');
       };
       utterance.onboundary = (event) => {
+        if (sessionId !== playbackSessionId) return;
         if (typeof event.charIndex === 'number') {
-          currentCharIndex = normalizeSeekIndex(startCharIndex + event.charIndex);
+          currentCharIndex = normalizeSeekIndex(currentChunkStart + event.charIndex);
           lastBoundaryAt = Date.now();
           updateProgressUI();
         }
@@ -603,6 +652,7 @@
         return;
       }
       speechStartTimer = window.setTimeout(() => {
+        if (sessionId !== playbackSessionId) return;
         if (!synth.speaking && !synth.paused) {
           showTtsStatus('Первая попытка запуска не сработала, пробую безопасный режим…');
           const fallbackUtterance = new SpeechSynthesisUtterance(remainingText);
@@ -622,7 +672,7 @@
             showTtsStatus('Озвучка не стартовала. Возможно, в браузере недоступны системные голоса.');
           }
         }
-      }, 350);
+      }, 500);
       updateProgressUI();
       updateListenButton();
     }
