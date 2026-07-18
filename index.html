@@ -266,15 +266,24 @@
         return target.toString();
     }
 
+    function normalizeLessonPath(filePath) {
+        if (!filePath) return '';
+        try {
+            return decodeURIComponent(String(filePath));
+        } catch (_) {
+            return String(filePath);
+        }
+    }
+
     function getActiveAudioState() {
         return {
-            lesson: localStorage.getItem(TTS_ACTIVE_LESSON_KEY) || '',
+            lesson: normalizeLessonPath(localStorage.getItem(TTS_ACTIVE_LESSON_KEY) || ''),
             state: localStorage.getItem(TTS_PLAYBACK_STATE_KEY) || ''
         };
     }
 
     function isAudioStateActive(audioState, item) {
-        return audioState.lesson === item.file_path && (audioState.state === 'playing' || audioState.state === 'paused');
+        return audioState.lesson === normalizeLessonPath(item.file_path) && (audioState.state === 'playing' || audioState.state === 'paused');
     }
 
     function clearActiveAudioState() {

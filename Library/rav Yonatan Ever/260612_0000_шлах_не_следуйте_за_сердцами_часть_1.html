@@ -314,7 +314,7 @@
     }
 
     function getLessonFilePath() {
-      const pathname = window.location.pathname || '';
+      const pathname = decodeURIComponent(window.location.pathname || '');
       const marker = '/Library/';
       const index = pathname.indexOf(marker);
       return index >= 0 ? pathname.slice(index + 1) : '';
