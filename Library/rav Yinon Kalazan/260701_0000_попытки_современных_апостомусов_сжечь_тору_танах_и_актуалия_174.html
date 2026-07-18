@@ -315,6 +315,7 @@
     let lastBoundaryAt = 0;
     let isSeeking = false;
     let speechStartTimer = null;
+    let lastManualPlayAttemptAt = 0;
     const SEEK_STEP_SECONDS = 10;
     const BASE_CHARS_PER_SECOND = 14;
 
@@ -453,6 +454,14 @@
       if (speechStartTimer) {
         window.clearTimeout(speechStartTimer);
         speechStartTimer = null;
+      }
+    }
+
+    function markManualPlayAttempt() {
+      lastManualPlayAttemptAt = Date.now();
+      if (listenBtn) {
+        listenBtn.textContent = '…';
+        listenBtn.title = 'Запуск озвучки…';
       }
     }
 
@@ -597,6 +606,7 @@
 
       clearTtsStatus();
       clearSpeechStartTimer();
+      markManualPlayAttempt();
 
       if (synth.speaking) synth.cancel();
 
@@ -669,6 +679,7 @@
       }
       speechStartTimer = window.setTimeout(() => {
         if (!synth.speaking && !synth.paused) {
+          showTtsStatus('Первая попытка запуска не сработала, пробую безопасный режим…');
           const fallbackUtterance = new SpeechSynthesisUtterance(remainingText);
           fallbackUtterance.lang = getLessonLang();
           fallbackUtterance.rate = getCurrentRate();
@@ -689,6 +700,14 @@
       }, 350);
       updateProgressUI();
       updateListenButton();
+    }
+
+    function handleListenPress(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      toggleSpeech();
     }
 
     function toggleSpeech() {
@@ -716,7 +735,9 @@
     document.getElementById('back-btn')?.addEventListener('click', () => {
       window.location.href = new URL('../../index.html', window.location.href).toString();
     });
-    listenBtn?.addEventListener('click', toggleSpeech);
+    listenBtn?.addEventListener('click', handleListenPress);
+    listenBtn?.addEventListener('touchend', handleListenPress, { passive: false });
+    listenBtn?.addEventListener('pointerup', handleListenPress);
     rewindBtn?.addEventListener('click', () => seekBySeconds(-SEEK_STEP_SECONDS));
     forwardBtn?.addEventListener('click', () => seekBySeconds(SEEK_STEP_SECONDS));
     settingsBtn?.addEventListener('click', (event) => {
