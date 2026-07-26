@@ -17,6 +17,12 @@
             text-align: center;
             margin-bottom: 12px;
         }
+        .stats-line {
+            font-size: 13px;
+            color: #51606f;
+            text-align: center;
+            margin-bottom: 12px;
+        }
         h1 { font-size: 24px; color: #2c3e50; text-align: center; margin-bottom: 20px; }
         .subtitle { text-align: center; color: #6b7a89; margin: -8px 0 20px; }
         .toolbar { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
@@ -53,6 +59,11 @@
             display: inline-block; background: #e8f4f8; color: #2980b9; padding: 3px 8px; border-radius: 10px; font-size: 11px;
         }
         .card-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+        .card-actions.main-actions { justify-content: space-between; }
+        .card-actions .left-actions,
+        .card-actions .right-actions {
+            display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+        }
         .card-action {
             width: 32px; height: 32px; border-radius: 9px; border: 1px solid #d9e2ec; background: white; color: #51606f;
             display: inline-flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; text-decoration: none;
@@ -60,6 +71,15 @@
         .card-action[disabled] { opacity: 0.45; cursor: not-allowed; }
         .card-action.active-audio {
             background: #eef6ff; color: #2980b9; border-color: #bcd6f2;
+        }
+        .card-action.like-action {
+            width: auto; min-width: 42px; padding: 0 8px; gap: 6px;
+        }
+        .card-action.whatsapp-action {
+            font-size: 17px;
+        }
+        .card-action.whatsapp-action svg {
+            width: 18px; height: 18px; display: block;
         }
 
         /* Стили для Дерева тем */
@@ -71,7 +91,8 @@
 </head>
 <body>
 <div class="container">
-    <div class="version-line">Ver. 260726.0252 &nbsp; 2026-07-26 02:52</div>
+    <div class="version-line">Ver. 260726.1715 &nbsp; 2026-07-26 17:15</div>
+    <div class="stats-line" id="total-likes-line">Всего лайков на сайте: …</div>
     <div class="toolbar">
         <input id="search-input" type="search" placeholder="Поиск по названию, автору, циклу, тегам" oninput="renderAll()">
         <select id="author-filter" onchange="renderAll()">
@@ -98,12 +119,196 @@
     let db = [];
     let rubricator = { roots: {} };
     let activeTagPath = null;
+    let likeCounts = new Map();
+    let likedByVisitor = new Map();
     const TTS_ACTIVE_LESSON_KEY = 'lesson_tts_active_lesson';
     const TTS_PLAYBACK_STATE_KEY = 'lesson_tts_playback_state';
+    const SUPABASE_URL = 'https://odbdyleemkvghmwcwxqi.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_sAdvoyW0Y01RosCZnyFPPw_Uurp_Xq6';
+    const SITE_KEY = 'lessons';
+    const WHATSAPP_NUMBER = '972545454333';
+    const REACTION_TYPE = 'like';
+    const VISITOR_ID_KEY = 'site_visitor_id_v1';
 
     function norm(value) {
         return (value || '').toString().toLowerCase();
     }
+
+    function slugify(value) {
+        return String(value || '')
+            .trim()
+            .toLowerCase()
+            .replace(/ё/g, 'е')
+            .replace(/\s+/g, '_')
+            .replace(/[^\p{L}\p{N}_-]+/gu, '_')
+            .replace(/_+/g, '_')
+            .replace(/^_+|_+$/g, '') || 'lesson';
+    }
+
+    function buildContentId(item = {}) {
+        const authorToken = slugify(item.author || 'lesson');
+        const dateToken = String(item.date || '').replace(/\D+/g, '').slice(0, 12) || 'nodate';
+        const sourceValue = item.source || '';
+        const sourceBase = sourceValue.split('/').pop()?.replace(/\.[^.]+$/i, '') || '';
+        const fileBase = String(item.file_path || '').split('/').pop()?.replace(/\.html?$/i, '') || '';
+        const primaryToken = slugify(sourceBase || fileBase || item.title || 'lesson');
+        return `${authorToken}-${dateToken}-${primaryToken}`;
+    }
+
+    function buildLibraryContentId(item = {}) {
+        return item.content_id ? slugify(item.content_id) : '';
+    }
+
+    function buildLegacyContentId(item = {}) {
+        const dateToken = String(item.date || '').replace(/\D+/g, '').slice(0, 12) || 'nodate';
+        const sourceValue = item.source || '';
+        const sourceBase = sourceValue.split('/').pop()?.replace(/\.[^.]+$/i, '') || '';
+        const fileBase = String(item.file_path || '').split('/').pop()?.replace(/\.html?$/i, '') || '';
+        const primaryToken = slugify(sourceBase || fileBase || item.title || 'lesson');
+        return `lesson-${dateToken}-${primaryToken}_docx`;
+    }
+
+    function getSupabaseHeaders(prefer = '') {
+        const headers = {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        };
+        if (prefer) headers['Prefer'] = prefer;
+        return headers;
+    }
+
+    function getOrCreateVisitorId() {
+        let visitorId = localStorage.getItem(VISITOR_ID_KEY);
+        if (visitorId) return visitorId;
+        if (window.crypto?.randomUUID) {
+            visitorId = window.crypto.randomUUID();
+        } else {
+            visitorId = `visitor_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+        }
+        localStorage.setItem(VISITOR_ID_KEY, visitorId);
+        return visitorId;
+    }
+
+    function getWhatsappHref(item) {
+        const title = item?.title || 'публикация';
+        const href = new URL(item?.file_path || '', window.location.href).toString();
+        const message = `Здравствуйте! Хочу написать по поводу публикации: ${title}\n${href}`;
+        return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    }
+
+    async function loadTotalLikesCount() {
+        const line = document.getElementById('total-likes-line');
+        if (!line) return;
+        const base = `${SUPABASE_URL}/rest/v1/content_reactions`;
+        const url = `${base}?select=id&site_key=eq.${encodeURIComponent(SITE_KEY)}&reaction_type=eq.${REACTION_TYPE}`;
+        try {
+            const response = await fetch(url, {
+                headers: { ...getSupabaseHeaders(), Prefer: 'count=exact' },
+            });
+            if (!response.ok) throw new Error('count failed');
+            const countHeader = response.headers.get('content-range') || '0-0/0';
+            const totalCount = parseInt(countHeader.split('/')[1] || '0', 10) || 0;
+            line.textContent = `Всего лайков на сайте: ${totalCount}`;
+        } catch (_) {
+            line.textContent = 'Всего лайков на сайте: недоступно';
+        }
+    }
+
+    function getLikeCount(item) {
+        return likeCounts.get(buildContentId(item)) || 0;
+    }
+
+    function isLessonLiked(item) {
+        return Boolean(item && likedByVisitor.get(buildContentId(item)));
+    }
+
+    function buildItemIdFilter(item) {
+        const contentId = buildContentId(item);
+        const libraryContentId = buildLibraryContentId(item);
+        const legacyContentId = buildLegacyContentId(item);
+        const ids = [contentId, libraryContentId, legacyContentId].filter(Boolean);
+        const uniqueIds = [...new Set(ids)];
+        if (uniqueIds.length > 1) {
+            return `content_id=in.(${uniqueIds.map(id => encodeURIComponent('"' + id + '"')).join(',')})`;
+        }
+        return `content_id=eq.${encodeURIComponent(contentId)}`;
+    }
+
+    async function fetchLikeStateForItem(item) {
+        const contentId = buildContentId(item);
+        const visitorId = getOrCreateVisitorId();
+        const base = `${SUPABASE_URL}/rest/v1/content_reactions`;
+        const idFilter = buildItemIdFilter(item);
+        const commonHeaders = getSupabaseHeaders();
+        const countUrl = `${base}?select=content_id&site_key=eq.${encodeURIComponent(SITE_KEY)}&${idFilter}&reaction_type=eq.${REACTION_TYPE}`;
+        const myLikeUrl = `${base}?select=id,content_id&site_key=eq.${encodeURIComponent(SITE_KEY)}&${idFilter}&reaction_type=eq.${REACTION_TYPE}&visitor_id=eq.${encodeURIComponent(visitorId)}&limit=10`;
+
+        const [countRes, myLikeRes] = await Promise.all([
+            fetch(countUrl, { headers: { ...commonHeaders, Prefer: 'count=exact' } }),
+            fetch(myLikeUrl, { headers: commonHeaders }),
+        ]);
+        if (!countRes.ok || !myLikeRes.ok) throw new Error('Не удалось загрузить лайки');
+
+        const countHeader = countRes.headers.get('content-range') || '0-0/0';
+        const countValue = parseInt(countHeader.split('/')[1] || '0', 10) || 0;
+        const myLikeRows = await myLikeRes.json();
+
+        likeCounts.set(contentId, countValue);
+        likedByVisitor.set(contentId, Array.isArray(myLikeRows) && myLikeRows.length > 0);
+    }
+
+    async function loadLikeCounts() {
+        likeCounts = new Map();
+        likedByVisitor = new Map();
+        if (!db.length) return;
+        await Promise.all(db.map(item => fetchLikeStateForItem(item).catch(() => {
+            likeCounts.set(buildContentId(item), 0);
+            likedByVisitor.set(buildContentId(item), false);
+        })));
+    }
+
+    async function toggleLikeFromList(event, filePath, lessonId) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const item = db.find(entry => entry.file_path === filePath);
+        if (!item) return;
+
+        const contentId = slugify(lessonId || buildContentId(item));
+        const visitorId = getOrCreateVisitorId();
+        const base = `${SUPABASE_URL}/rest/v1/content_reactions`;
+
+        try {
+            if (isLessonLiked(item)) {
+                const idFilter = buildItemIdFilter(item);
+                const deleteUrl = `${base}?site_key=eq.${encodeURIComponent(SITE_KEY)}&${idFilter}&reaction_type=eq.${REACTION_TYPE}&visitor_id=eq.${encodeURIComponent(visitorId)}`;
+                const response = await fetch(deleteUrl, {
+                    method: 'DELETE',
+                    headers: getSupabaseHeaders(),
+                });
+                if (!response.ok) throw new Error('delete failed');
+            } else {
+                const response = await fetch(base, {
+                    method: 'POST',
+                    headers: {
+                        ...getSupabaseHeaders('resolution=merge-duplicates,return=minimal'),
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify([{
+                        site_key: SITE_KEY,
+                        content_id: contentId,
+                        visitor_id: visitorId,
+                        reaction_type: REACTION_TYPE,
+                    }]),
+                });
+                if (!response.ok) throw new Error('insert failed');
+            }
+            await fetchLikeStateForItem(item);
+            renderAll();
+        } catch (_) {}
+    }
+
+    window.toggleLikeFromList = toggleLikeFromList;
 
     function getRootMap() {
         return rubricator?.roots || {};
@@ -305,25 +510,43 @@
         renderAll();
     }
 
+    function openLessonFromCard(event, filePath) {
+        const interactiveTarget = event.target.closest('button, a, input, select, textarea, label');
+        if (interactiveTarget) return;
+        window.location.href = filePath;
+    }
+
     function renderCardActions(item) {
         const audioState = getActiveAudioState();
         const isActiveLesson = isAudioStateActive(audioState, item);
         if (isActiveLesson) {
             return `
-                <div class="card-actions">
-                    <a href="#" class="card-action active-audio" title="Остановить прослушивание" onclick="stopActiveAudioFromCard(event)">${audioState.state === 'playing' ? '⏸' : '▶'}</a>
-                    <button type="button" class="card-action" title="Печать" disabled>🖨</button>
-                    <button type="button" class="card-action" title="PDF" disabled>📄</button>
-                    <button type="button" class="card-action" title="Оригинал" disabled>🔗</button>
+                <div class="card-actions main-actions">
+                    <div class="left-actions">
+                        <a href="#" class="card-action active-audio" title="Остановить прослушивание" onclick="stopActiveAudioFromCard(event)">${audioState.state === 'playing' ? '⏸' : '▶'}</a>
+                        <button type="button" class="card-action" title="Печать" disabled>🖨</button>
+                        <button type="button" class="card-action" title="PDF" disabled>📄</button>
+                        <button type="button" class="card-action" title="Оригинал" disabled>🔗</button>
+                    </div>
+                    <div class="right-actions">
+                        <button type="button" class="card-action like-action ${isLessonLiked(item) ? 'active-audio' : ''}" title="Поставить лайк" data-like-file-path="${escapeHtml(item.file_path)}" data-like-id="${escapeHtml(buildContentId(item))}">👍 <span>${getLikeCount(item)}</span></button>
+                        <a href="${getWhatsappHref(item)}" class="card-action whatsapp-action" title="Связаться с админом в WhatsApp" aria-label="Связаться с админом в WhatsApp" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()"><svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M27.2 4.7A15.2 15.2 0 0 0 3.4 23.3L1.5 30.5l7.4-1.9A15.2 15.2 0 1 0 27.2 4.7Z" fill="#25D366"/><path d="M25.8 16.1c0 5.4-4.4 9.7-9.8 9.7-1.7 0-3.3-.4-4.7-1.2l-.3-.2-4.4 1.1 1.2-4.2-.2-.3a9.64 9.64 0 0 1-1.5-5c0-5.4 4.4-9.7 9.8-9.7 2.6 0 5 1 6.9 2.8a9.52 9.52 0 0 1 3 7Z" fill="#25D366"/><path d="M13.1 11.2c-.2-.5-.4-.5-.6-.5h-.5c-.2 0-.6.1-.9.4-.3.4-1.2 1.1-1.2 2.7s1.2 3.2 1.4 3.4c.2.2 2.3 3.7 5.8 5 .8.3 1.4.5 1.9.6.8.2 1.5.2 2.1.1.6-.1 1.8-.8 2.1-1.6.3-.8.3-1.5.2-1.6-.1-.1-.4-.2-.9-.5-.5-.2-2.1-1-2.4-1.1-.3-.1-.6-.2-.8.2-.2.3-.9 1.1-1.1 1.4-.2.2-.4.3-.8.1-.5-.2-1.9-.7-3.5-2.2-1.3-1.1-2.1-2.4-2.3-2.8-.2-.4 0-.6.1-.8.1-.1.2-.3.4-.5.1-.2.2-.3.3-.6.1-.2 0-.5 0-.6 0-.2-.7-1.8-1-2.5Z" fill="white"/></svg></a>
+                    </div>
                 </div>
             `;
         }
         return `
-            <div class="card-actions">
-                <a href="${getAutoplayHref(item.file_path)}" class="card-action" title="Прослушать" onclick="event.stopPropagation()">▶</a>
-                <button type="button" class="card-action" title="Печать" disabled>🖨</button>
-                <button type="button" class="card-action" title="PDF" disabled>📄</button>
-                <button type="button" class="card-action" title="Оригинал" disabled>🔗</button>
+            <div class="card-actions main-actions">
+                <div class="left-actions">
+                    <a href="${getAutoplayHref(item.file_path)}" class="card-action" title="Прослушать" onclick="event.stopPropagation()">▶</a>
+                    <button type="button" class="card-action" title="Печать" disabled>🖨</button>
+                    <button type="button" class="card-action" title="PDF" disabled>📄</button>
+                    <button type="button" class="card-action" title="Оригинал" disabled>🔗</button>
+                </div>
+                <div class="right-actions">
+                    <button type="button" class="card-action like-action ${isLessonLiked(item) ? 'active-audio' : ''}" title="Поставить лайк" data-like-file-path="${escapeHtml(item.file_path)}" data-like-id="${escapeHtml(buildContentId(item))}">👍 <span>${getLikeCount(item)}</span></button>
+                    <a href="${getWhatsappHref(item)}" class="card-action whatsapp-action" title="Связаться с админом в WhatsApp" aria-label="Связаться с админом в WhatsApp" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()"><svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M27.2 4.7A15.2 15.2 0 0 0 3.4 23.3L1.5 30.5l7.4-1.9A15.2 15.2 0 1 0 27.2 4.7Z" fill="#25D366"/><path d="M25.8 16.1c0 5.4-4.4 9.7-9.8 9.7-1.7 0-3.3-.4-4.7-1.2l-.3-.2-4.4 1.1 1.2-4.2-.2-.3a9.64 9.64 0 0 1-1.5-5c0-5.4 4.4-9.7 9.8-9.7 2.6 0 5 1 6.9 2.8a9.52 9.52 0 0 1 3 7Z" fill="#25D366"/><path d="M13.1 11.2c-.2-.5-.4-.5-.6-.5h-.5c-.2 0-.6.1-.9.4-.3.4-1.2 1.1-1.2 2.7s1.2 3.2 1.4 3.4c.2.2 2.3 3.7 5.8 5 .8.3 1.4.5 1.9.6.8.2 1.5.2 2.1.1.6-.1 1.8-.8 2.1-1.6.3-.8.3-1.5.2-1.6-.1-.1-.4-.2-.9-.5-.5-.2-2.1-1-2.4-1.1-.3-.1-.6-.2-.8.2-.2.3-.9 1.1-1.1 1.4-.2.2-.4.3-.8.1-.5-.2-1.9-.7-3.5-2.2-1.3-1.1-2.1-2.4-2.3-2.8-.2-.4 0-.6.1-.8.1-.1.2-.3.4-.5.1-.2.2-.3.3-.6.1-.2 0-.5 0-.6 0-.2-.7-1.8-1-2.5Z" fill="white"/></svg></a>
+                </div>
             </div>
         `;
     }
@@ -422,7 +645,7 @@
         }
         
         container.innerHTML = sorted.map(item => `
-            <div class="lesson-card" onclick="window.location.href=${JSON.stringify(item.file_path)}">
+            <div class="lesson-card" onclick="openLessonFromCard(event, ${JSON.stringify(item.file_path)})">
                 <a href="${item.file_path}" class="lesson-link">
                     <div class="lesson-title">${item.title}</div>
                 </a>
@@ -474,11 +697,12 @@
                 if (node[key]._lessons.length > 0) {
                     node[key]._lessons.forEach(lesson => {
                         html += `
-                            <div class="lesson-card" style="margin-left:15px; border-top: 2px solid #3498db;" onclick="window.location.href=${JSON.stringify(lesson.file_path)}">
+                            <div class="lesson-card" style="margin-left:15px; border-top: 2px solid #3498db;" onclick="openLessonFromCard(event, ${JSON.stringify(lesson.file_path)})">
                                 <a href="${lesson.file_path}" class="lesson-link">
                                     <div class="lesson-title" style="font-size:15px;">${lesson.title}</div>
                                 </a>
                                 <div class="lesson-meta">Автор: ${lesson.author || 'Не указан'}${lesson.cycle ? ` | ${lesson.cycle}` : ''}</div>
+                                ${renderCardActions(lesson)}
                             </div>`;
                     });
                 }
@@ -501,9 +725,13 @@
         fetch('_data/tag_rubricator.json').then(res => res.ok ? res.json() : { roots: {} }).catch(() => ({ roots: {} })),
         fetch('library.json').then(res => res.json())
     ])
-        .then(([rubricatorData, libraryData]) => {
+        .then(async ([rubricatorData, libraryData]) => {
             rubricator = rubricatorData || { roots: {} };
             db = libraryData;
+            await loadTotalLikesCount().catch(() => {});
+            await loadLikeCounts().catch(() => {
+                likeCounts = new Map();
+            });
             populateFilters();
             renderAll();
         })
@@ -523,6 +751,12 @@
 
     window.addEventListener('focus', () => {
         renderAll();
+    });
+
+    document.addEventListener('click', (event) => {
+        const likeBtn = event.target.closest('.like-action[data-like-file-path][data-like-id]');
+        if (!likeBtn) return;
+        toggleLikeFromList(event, likeBtn.dataset.likeFilePath, likeBtn.dataset.likeId);
     });
 </script>
 </body>

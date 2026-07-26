@@ -99,6 +99,39 @@
       display: none;
     }
     .tts-status.visible { display: block; }
+    .engagement-strip {
+      display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+      margin: 10px 0 18px auto; flex-wrap: wrap; width: fit-content;
+    }
+    .engagement-btn {
+      border: 1px solid #d9e2ec; background: white; color: #425466; border-radius: 10px;
+      min-width: 38px; height: 38px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 16px; text-decoration: none; gap: 6px;
+    }
+    .engagement-btn:hover { background: #f8fafc; }
+    .engagement-btn.active {
+      background: #eef6ff; color: #1d4ed8; border-color: #93c5fd;
+    }
+    .engagement-count {
+      display: inline-flex; min-width: 16px; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 13px;
+    }
+    .whatsapp-icon {
+      width: 18px; height: 18px; display: inline-block;
+    }
+    .whatsapp-icon svg {
+      width: 100%; height: 100%; display: block;
+    }
+    .engagement-error {
+      width: 100%; font-size: 12px; color: #b91c1c; display: none;
+      text-align: right;
+    }
+    .engagement-error.visible { display: block; }
+    .engagement-success {
+      width: 100%; font-size: 12px; color: #166534; display: none;
+      text-align: right;
+    }
+    .engagement-success.visible { display: block; }
   </style>
 </head>
 <body>
@@ -182,6 +215,23 @@
     </div>
     <h1>Балак - Тора для львов</h1>
     <div class="meta"><strong>Р. Аарон Леви</strong><br>2026-06-25</div>
+    <div class="engagement-strip" id="engagement-bar">
+      <button type="button" class="engagement-btn" id="like-btn" title="Поставить лайк публикации" aria-label="Поставить лайк публикации" onclick="window.__lessonToggleLike && window.__lessonToggleLike(event)">
+        <span aria-hidden="true">👍</span>
+        <span class="engagement-count" id="like-count">0</span>
+      </button>
+      <a class="engagement-btn" id="contact-admin-btn" href="#" target="_blank" rel="noopener noreferrer" title="Связаться с админом в WhatsApp" aria-label="Связаться с админом в WhatsApp">
+        <span aria-hidden="true" class="whatsapp-icon">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M27.2 4.7A15.2 15.2 0 0 0 3.4 23.3L1.5 30.5l7.4-1.9A15.2 15.2 0 1 0 27.2 4.7Z" fill="#25D366"/>
+            <path d="M25.8 16.1c0 5.4-4.4 9.7-9.8 9.7-1.7 0-3.3-.4-4.7-1.2l-.3-.2-4.4 1.1 1.2-4.2-.2-.3a9.64 9.64 0 0 1-1.5-5c0-5.4 4.4-9.7 9.8-9.7 2.6 0 5 1 6.9 2.8a9.52 9.52 0 0 1 3 7Z" fill="#25D366"/>
+            <path d="M13.1 11.2c-.2-.5-.4-.5-.6-.5h-.5c-.2 0-.6.1-.9.4-.3.4-1.2 1.1-1.2 2.7s1.2 3.2 1.4 3.4c.2.2 2.3 3.7 5.8 5 .8.3 1.4.5 1.9.6.8.2 1.5.2 2.1.1.6-.1 1.8-.8 2.1-1.6.3-.8.3-1.5.2-1.6-.1-.1-.4-.2-.9-.5-.5-.2-2.1-1-2.4-1.1-.3-.1-.6-.2-.8.2-.2.3-.9 1.1-1.1 1.4-.2.2-.4.3-.8.1-.5-.2-1.9-.7-3.5-2.2-1.3-1.1-2.1-2.4-2.3-2.8-.2-.4 0-.6.1-.8.1-.1.2-.3.4-.5.1-.2.2-.3.3-.6.1-.2 0-.5 0-.6 0-.2-.7-1.8-1-2.5Z" fill="white"/>
+          </svg>
+        </span>
+      </a>
+      <div class="engagement-success" id="engagement-success" role="status" aria-live="polite"></div>
+      <div class="engagement-error" id="engagement-error" role="status" aria-live="polite"></div>
+    </div>
     <article id="lesson-text"><p class="lesson-heading">בס״ד<span class="sr-only">.</span></p>
 <p class="lesson-heading">Правда, стоящая за протестами харедим<span class="sr-only">.</span></p>
 <p>Здравствуйте. На прошлой неделе мне позвонил руководитель мидраши для молодежи, которая вопреки всему решила принять на себя иго Торы и мицвот, и попросил меня приехать и выступить перед ними. Сначала я отказался. Я объяснил ему, что мой опыт показывает: чем моложе аудитория, тем менее эффективны мои лекции и тем меньше им интересен мой контент. Я сказал, что, на мой взгляд, ему стоит пригласить других лекторов, которые больше подходят для 16-летних подростков.</p>
@@ -240,6 +290,12 @@
     const TTS_RATE_KEY = 'lesson_tts_rate';
     const TTS_ACTIVE_LESSON_KEY = 'lesson_tts_active_lesson';
     const TTS_PLAYBACK_STATE_KEY = 'lesson_tts_playback_state';
+    const SUPABASE_URL = 'https://odbdyleemkvghmwcwxqi.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_sAdvoyW0Y01RosCZnyFPPw_Uurp_Xq6';
+    const SITE_KEY = 'lessons';
+    const WHATSAPP_NUMBER = '972545454333';
+    const VISITOR_ID_KEY = 'site_visitor_id_v1';
+    const REACTION_TYPE = 'like';
     const lessonPassport = JSON.parse(document.getElementById('lesson-passport')?.textContent || '{}');
     const lessonTextEl = document.getElementById('lesson-text');
     const listenBtn = document.getElementById('listen-btn');
@@ -254,6 +310,11 @@
     const voiceHelpClose = document.getElementById('voice-help-close');
     const speedEl = document.getElementById('tts-speed');
     const ttsStatusEl = document.getElementById('tts-status');
+    const likeBtn = document.getElementById('like-btn');
+    const likeCountEl = document.getElementById('like-count');
+    const engagementSuccessEl = document.getElementById('engagement-success');
+    const engagementErrorEl = document.getElementById('engagement-error');
+    const contactAdminBtn = document.getElementById('contact-admin-btn');
     const synth = window.speechSynthesis;
     let activeUtterance = null;
     let allVoices = [];
@@ -266,9 +327,196 @@
     let speechStartTimer = null;
     let lastManualPlayAttemptAt = 0;
     let playbackSessionId = 0;
+    let likeState = { count: 0, liked: false };
     const SEEK_STEP_SECONDS = 10;
     const BASE_CHARS_PER_SECOND = 14;
     const MAX_CHUNK_CHARS = 900;
+
+    function slugify(value) {
+      return String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/ё/g, 'е')
+        .replace(/\s+/g, '_')
+        .replace(/[^\p{L}\p{N}_-]+/gu, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_+|_+$/g, '') || 'lesson';
+    }
+
+    function buildContentId(passport = {}, filePath = '') {
+      const explicit = passport.content_id || passport.lesson_id;
+      if (explicit) return slugify(explicit);
+
+      const authorToken = slugify(passport.author || 'lesson');
+      const dateToken = String(passport.date || '').replace(/\D+/g, '').slice(0, 12) || 'nodate';
+      const sourceValue = passport.source || '';
+      const sourceBase = sourceValue.split('/').pop()?.replace(/\.[^.]+$/i, '') || '';
+      const fileBase = String(filePath || '').split('/').pop()?.replace(/\.html?$/i, '') || '';
+      const primaryToken = slugify(sourceBase || fileBase || passport.title || 'lesson');
+      return `${authorToken}-${dateToken}-${primaryToken}`;
+    }
+
+    function getPageFilePath() {
+      const pathname = decodeURIComponent(window.location.pathname || '');
+      const marker = '/Library/';
+      const index = pathname.indexOf(marker);
+      return index >= 0 ? pathname.slice(index + 1) : '';
+    }
+
+    function getCurrentContentId() {
+      return buildContentId(lessonPassport, getPageFilePath());
+    }
+
+    function getLegacyContentId() {
+      const filePath = getPageFilePath();
+      const authorToken = slugify(lessonPassport.author || 'lesson');
+      const dateToken = String(lessonPassport.date || '').replace(/\D+/g, '').slice(0, 12) || 'nodate';
+      const sourceValue = lessonPassport.source || '';
+      const sourceBase = sourceValue.split('/').pop()?.replace(/\.[^.]+$/i, '') || '';
+      const fileBase = String(filePath || '').split('/').pop()?.replace(/\.html?$/i, '') || '';
+      const primaryToken = slugify(sourceBase || fileBase || lessonPassport.title || 'lesson');
+      return `lesson-${dateToken}-${primaryToken}_docx`;
+    }
+
+    function getOrCreateVisitorId() {
+      let visitorId = localStorage.getItem(VISITOR_ID_KEY);
+      if (visitorId) return visitorId;
+      if (window.crypto?.randomUUID) {
+        visitorId = window.crypto.randomUUID();
+      } else {
+        visitorId = `visitor_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+      }
+      localStorage.setItem(VISITOR_ID_KEY, visitorId);
+      return visitorId;
+    }
+
+    function getSupabaseHeaders(prefer = '') {
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      };
+      if (prefer) headers['Prefer'] = prefer;
+      return headers;
+    }
+
+    function setEngagementError(message) {
+      if (!engagementErrorEl) return;
+      engagementErrorEl.textContent = message || '';
+      engagementErrorEl.classList.toggle('visible', Boolean(message));
+    }
+
+    function setEngagementSuccess(message) {
+      if (!engagementSuccessEl) return;
+      engagementSuccessEl.textContent = message || '';
+      engagementSuccessEl.classList.toggle('visible', Boolean(message));
+    }
+
+    function updateLikeUI() {
+      if (likeCountEl) likeCountEl.textContent = String(likeState.count || 0);
+      if (likeBtn) likeBtn.classList.toggle('active', Boolean(likeState.liked));
+      if (likeBtn) {
+        const label = likeState.liked ? 'Ваш лайк учтён' : 'Поставить лайк публикации';
+        likeBtn.title = `${label} (${likeState.count || 0})`;
+        likeBtn.setAttribute('aria-label', `${label}. Всего лайков: ${likeState.count || 0}`);
+      }
+      setEngagementSuccess(likeState.liked ? `Лайк сохранён. Всего лайков: ${likeState.count || 0}` : '');
+    }
+
+    async function fetchLikeState() {
+      const contentId = getCurrentContentId();
+      const legacyContentId = getLegacyContentId();
+      const visitorId = getOrCreateVisitorId();
+      const base = `${SUPABASE_URL}/rest/v1/content_reactions`;
+      const commonHeaders = getSupabaseHeaders();
+      const idFilter = legacyContentId && legacyContentId !== contentId
+        ? `content_id=in.(${encodeURIComponent('"' + contentId + '"')},${encodeURIComponent('"' + legacyContentId + '"')})`
+        : `content_id=eq.${encodeURIComponent(contentId)}`;
+      const countUrl = `${base}?select=content_id&site_key=eq.${encodeURIComponent(SITE_KEY)}&${idFilter}&reaction_type=eq.${REACTION_TYPE}`;
+      const myLikeUrl = `${base}?select=id,content_id&site_key=eq.${encodeURIComponent(SITE_KEY)}&${idFilter}&reaction_type=eq.${REACTION_TYPE}&visitor_id=eq.${encodeURIComponent(visitorId)}&limit=10`;
+
+      const [countRes, myLikeRes] = await Promise.all([
+        fetch(countUrl, { headers: { ...commonHeaders, Prefer: 'count=exact' } }),
+        fetch(myLikeUrl, { headers: commonHeaders }),
+      ]);
+
+      if (!countRes.ok || !myLikeRes.ok) {
+        throw new Error('Не удалось загрузить состояние лайков');
+      }
+
+      const countHeader = countRes.headers.get('content-range') || '0-0/0';
+      const countValue = parseInt(countHeader.split('/')[1] || '0', 10) || 0;
+      const myLikeRows = await myLikeRes.json();
+
+      likeState = {
+        count: countValue,
+        liked: Array.isArray(myLikeRows) && myLikeRows.length > 0,
+      };
+      updateLikeUI();
+    }
+
+    async function toggleLike(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      if (!likeBtn) return;
+      likeBtn.disabled = true;
+      setEngagementError('');
+      setEngagementSuccess('Отправляю лайк…');
+
+      const contentId = getCurrentContentId();
+      const legacyContentId = getLegacyContentId();
+      const visitorId = getOrCreateVisitorId();
+      const base = `${SUPABASE_URL}/rest/v1/content_reactions`;
+
+      try {
+        if (likeState.liked) {
+          const idsToDelete = [contentId];
+          if (legacyContentId && legacyContentId !== contentId) idsToDelete.push(legacyContentId);
+          const idFilter = idsToDelete.length > 1
+            ? `content_id=in.(${idsToDelete.map(id => encodeURIComponent('"' + id + '"')).join(',')})`
+            : `content_id=eq.${encodeURIComponent(contentId)}`;
+          const deleteUrl = `${base}?site_key=eq.${encodeURIComponent(SITE_KEY)}&${idFilter}&reaction_type=eq.${REACTION_TYPE}&visitor_id=eq.${encodeURIComponent(visitorId)}`;
+          const response = await fetch(deleteUrl, {
+            method: 'DELETE',
+            headers: getSupabaseHeaders(),
+          });
+          if (!response.ok) throw new Error('Не удалось снять лайк');
+        } else {
+          const response = await fetch(base, {
+            method: 'POST',
+            headers: {
+              ...getSupabaseHeaders('resolution=merge-duplicates,return=minimal'),
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify([{
+              site_key: SITE_KEY,
+              content_id: contentId,
+              visitor_id: visitorId,
+              reaction_type: REACTION_TYPE,
+            }]),
+          });
+          if (!response.ok) throw new Error('Не удалось поставить лайк');
+        }
+
+        await fetchLikeState();
+      } catch (error) {
+        setEngagementError('Лайк сейчас недоступен. Проверьте настройки Supabase и таблицы.');
+      } finally {
+        likeBtn.disabled = false;
+      }
+    }
+
+    window.__lessonToggleLike = toggleLike;
+
+    function initContactButton() {
+      if (!contactAdminBtn) return;
+      const title = lessonPassport.title || document.title || 'публикация';
+      const message = `Здравствуйте! Хочу написать по поводу публикации: ${title}\n${window.location.href}`;
+      contactAdminBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+      contactAdminBtn.title = `Связаться с админом в WhatsApp: ${title}`;
+      contactAdminBtn.setAttribute('aria-label', `Связаться с админом в WhatsApp по публикации ${title}`);
+    }
 
     function getLessonLang() {
       return (lessonPassport.lang || 'ru') === 'he' ? 'he-IL' : ((lessonPassport.lang || 'ru') === 'en' ? 'en-US' : 'ru-RU');
@@ -797,6 +1045,7 @@
         toggleVoiceHelp(false);
       }
     });
+    likeBtn?.addEventListener('click', toggleLike);
 
     if (voiceEl) voiceEl.innerHTML = '<option value="">Загрузка голосов…</option>';
     if (voiceFilterEl) voiceFilterEl.value = getPreferredVoiceFilter();
@@ -812,6 +1061,11 @@
       };
     }
     updateListenButton();
+    updateLikeUI();
+    initContactButton();
+    fetchLikeState().catch(() => {
+      setEngagementError('Не удалось загрузить лайки. Проверьте настройки Supabase.');
+    });
 
     if (new URLSearchParams(window.location.search).get('autoplay') === '1') {
       setTimeout(() => playSpeech(currentCharIndex), 200);
