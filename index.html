@@ -146,6 +146,9 @@
     }
 
     function buildContentId(item = {}) {
+        const explicit = item.lesson_id || item.content_id;
+        if (explicit) return slugify(explicit);
+
         const authorToken = slugify(item.author || 'lesson');
         const dateToken = String(item.date || '').replace(/\D+/g, '').slice(0, 12) || 'nodate';
         const sourceValue = item.source || '';
@@ -153,19 +156,6 @@
         const fileBase = String(item.file_path || '').split('/').pop()?.replace(/\.html?$/i, '') || '';
         const primaryToken = slugify(sourceBase || fileBase || item.title || 'lesson');
         return `${authorToken}-${dateToken}-${primaryToken}`;
-    }
-
-    function buildLibraryContentId(item = {}) {
-        return item.content_id ? slugify(item.content_id) : '';
-    }
-
-    function buildLegacyContentId(item = {}) {
-        const dateToken = String(item.date || '').replace(/\D+/g, '').slice(0, 12) || 'nodate';
-        const sourceValue = item.source || '';
-        const sourceBase = sourceValue.split('/').pop()?.replace(/\.[^.]+$/i, '') || '';
-        const fileBase = String(item.file_path || '').split('/').pop()?.replace(/\.html?$/i, '') || '';
-        const primaryToken = slugify(sourceBase || fileBase || item.title || 'lesson');
-        return `lesson-${dateToken}-${primaryToken}_docx`;
     }
 
     function getSupabaseHeaders(prefer = '') {
@@ -223,15 +213,8 @@
     }
 
     function buildItemIdFilter(item) {
-        const contentId = buildContentId(item);
-        const libraryContentId = buildLibraryContentId(item);
-        const legacyContentId = buildLegacyContentId(item);
-        const ids = [contentId, libraryContentId, legacyContentId].filter(Boolean);
-        const uniqueIds = [...new Set(ids)];
-        if (uniqueIds.length > 1) {
-            return `content_id=in.(${uniqueIds.map(id => encodeURIComponent('"' + id + '"')).join(',')})`;
-        }
-        return `content_id=eq.${encodeURIComponent(contentId)}`;
+        const lessonId = buildContentId(item);
+        return `content_id=eq.${encodeURIComponent(lessonId)}`;
     }
 
     async function fetchLikeStateForItem(item) {
