@@ -466,7 +466,7 @@
         likeBtn.title = `${label} (${likeState.count || 0})`;
         likeBtn.setAttribute('aria-label', `${label}. Всего лайков: ${likeState.count || 0}`);
       }
-      setEngagementSuccess(likeState.liked ? `Лайк сохранён. Всего лайков: ${likeState.count || 0}` : '');
+      setEngagementSuccess('');
     }
 
     async function fetchLikeState() {
@@ -506,7 +506,7 @@
       if (!likeBtn) return;
       likeBtn.disabled = true;
       setEngagementError('');
-      setEngagementSuccess('Отправляю лайк…');
+      setEngagementSuccess('');
 
       const lessonId = getCurrentContentId();
       const visitorId = getOrCreateVisitorId();
@@ -540,7 +540,7 @@
 
         await fetchLikeState();
       } catch (error) {
-        setEngagementError('Лайк сейчас недоступен. Проверьте настройки Supabase и таблицы.');
+        setEngagementError('');
       } finally {
         likeBtn.disabled = false;
       }
@@ -1103,7 +1103,7 @@
     updateLikeUI();
     initContactButton();
     fetchLikeState().catch(() => {
-      setEngagementError('Не удалось загрузить лайки. Проверьте настройки Supabase.');
+      setEngagementError('');
     });
 
     if (new URLSearchParams(window.location.search).get('autoplay') === '1') {
