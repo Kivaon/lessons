@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>О роли изучающих Тору в наши дни | Раввин Аарон Леви</title>
+  <title>О роли изучающих Тору в наши дни</title>
   <script type="application/json" id="lesson-passport">{
-  "title": "О роли изучающих Тору в наши дни | Раввин Аарон Леви",
+  "title": "О роли изучающих Тору в наши дни",
   "author": "Р. Аарон Леви",
   "cycle": "",
   "date": "2026-08-15T22:51:00",
@@ -216,7 +216,7 @@
         <button type="button" class="action-btn voice-help-close" id="voice-help-close">Понятно</button>
       </div>
     </div>
-    <h1>О роли изучающих Тору в наши дни | Раввин Аарон Леви</h1>
+    <h1>О роли изучающих Тору в наши дни</h1>
     <div class="meta"><strong>Р. Аарон Леви</strong><br>2026-08-15T22:51:00</div>
     <div class="engagement-strip" id="engagement-bar">
       <button type="button" class="engagement-btn" id="like-btn" title="Поставить лайк публикации" aria-label="Поставить лайк публикации" onclick="window.__lessonToggleLike && window.__lessonToggleLike(event)">
@@ -568,10 +568,10 @@
     function initContactButton() {
       if (!contactAdminBtn) return;
       const title = lessonPassport.title || document.title || 'публикация';
-      const message = `Здравствуйте! Хочу написать по поводу публикации: $О роли изучающих Тору в наши дни | Раввин Аарон Леви\n${window.location.href}`;
+      const message = `Здравствуйте! Хочу написать по поводу публикации: $О роли изучающих Тору в наши дни\n${window.location.href}`;
       contactAdminBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-      contactAdminBtn.title = `Связаться с админом в WhatsApp: $О роли изучающих Тору в наши дни | Раввин Аарон Леви`;
-      contactAdminBtn.setAttribute('aria-label', `Связаться с админом в WhatsApp по публикации $О роли изучающих Тору в наши дни | Раввин Аарон Леви`);
+      contactAdminBtn.title = `Связаться с админом в WhatsApp: $О роли изучающих Тору в наши дни`;
+      contactAdminBtn.setAttribute('aria-label', `Связаться с админом в WhatsApp по публикации $О роли изучающих Тору в наши дни`);
     }
 
     function getLessonLang() {
