@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Назад в будущее. Парашат Ки Теце</title>
+  <script type="application/json" id="lesson-passport">{
+  "title": "Назад в будущее. Парашат Ки Теце",
+  "author": "Р. Аарон Леви",
+  "cycle": "",
+  "date": "2026-08-21T18:07:00",
+  "tags": [
+    [
+      "Хумаш",
+      "Дварим",
+      "Ки Теце"
+    ]
+  ],
+  "lang": "ru",
+  "source": "TR_260821_1510-Rabbi_Aharon_Levi-26-08-19-eQnAb-BByuc.docx",
+  "lesson_id": "260821_180729_00"
+}</script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; max-width: 760px; margin: 0 auto; padding: 20px; line-height: 1.7; color: #243447; background: #f8fafc; }
+    main { background: white; padding: 28px; border-radius: 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.05); }
+    .meta { color: #5b6b79; margin-bottom: 24px; }
+    article { white-space: normal; }
+    article p { margin: 0 0 1em; }
+    article p:last-child { margin-bottom: 0; }
+    .lesson-heading { font-weight: 600; margin: 1.25em 0 0.5em; }
+    .lesson-heading:first-child { margin-top: 0; }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .action-bar {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      margin-bottom: 18px; flex-wrap: wrap; position: relative;
+    }
+    .action-group {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .action-group.left-group {
+      flex: 1 1 420px; min-width: 280px;
+    }
+    .action-group.right-group {
+      justify-content: flex-end;
+    }
+    .action-btn, .settings-select {
+      border: 1px solid #d9e2ec; background: white; color: #425466; border-radius: 10px;
+      min-width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 16px;
+    }
+    .action-btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+    .timeline-wrap {
+      flex: 1 1 180px; min-width: 160px; display: flex; align-items: center;
+    }
+    .timeline-slider {
+      width: 100%; accent-color: #425466; cursor: pointer;
+    }
+    .settings-panel {
+      position: absolute; top: calc(100% + 8px); right: 0; z-index: 10; min-width: 250px;
+      background: white; border: 1px solid #d9e2ec; border-radius: 12px; box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+      padding: 12px; display: none;
+    }
+    .settings-panel.open { display: block; }
+    .voice-help {
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 30;
+      display: none; align-items: center; justify-content: center; padding: 20px;
+    }
+    .voice-help.open { display: flex; }
+    .voice-help-dialog {
+      width: min(760px, 100%); max-height: 80vh; overflow: auto; background: white; color: #243447;
+      border-radius: 16px; box-shadow: 0 18px 40px rgba(0,0,0,0.18); padding: 20px;
+    }
+    .voice-help-dialog h3 { margin: 0 0 12px; font-size: 20px; }
+    .voice-help-dialog h4 { margin: 16px 0 8px; font-size: 16px; }
+    .voice-help-dialog p, .voice-help-dialog li { font-size: 14px; line-height: 1.6; }
+    .voice-help-dialog ul, .voice-help-dialog ol { margin: 8px 0 0 20px; padding: 0; }
+    .voice-help-close { margin-top: 16px; }
+    .settings-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+    .settings-row:last-child { margin-bottom: 0; }
+    .settings-label { font-size: 12px; color: #6b7a89; }
+    .settings-select { width: 100%; justify-content: flex-start; padding: 0 10px; min-width: 0; }
+    .tts-status {
+      margin: 0 0 14px;
+      font-size: 13px;
+      color: #8a5a00;
+      background: #fff7e6;
+      border: 1px solid #f3d19c;
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: none;
+    }
+    .tts-status.visible { display: block; }
+    .engagement-strip {
+      display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+      margin: 10px 0 18px auto; flex-wrap: wrap; width: fit-content;
+    }
+    .engagement-btn {
+      border: 1px solid #d9e2ec; background: white; color: #425466; border-radius: 10px;
+      min-width: 38px; height: 38px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 16px; text-decoration: none; gap: 6px;
+    }
+    .engagement-btn:hover { background: #f8fafc; }
+    .engagement-btn.active {
+      background: #eef6ff; color: #1d4ed8; border-color: #93c5fd;
+    }
+    .engagement-count {
+      display: inline-flex; min-width: 16px; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 13px;
+    }
+    .whatsapp-icon {
+      width: 18px; height: 18px; display: inline-block;
+    }
+    .whatsapp-icon svg {
+      width: 100%; height: 100%; display: block;
+    }
+    .engagement-error {
+      width: 100%; font-size: 12px; color: #b91c1c; display: none;
+      text-align: right;
+    }
+    .engagement-error.visible { display: block; }
+    .engagement-success {
+      width: 100%; font-size: 12px; color: #166534; display: none;
+      text-align: right;
+    }
+    .engagement-success.visible { display: block; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="action-bar">
+      <div class="action-group left-group">
+        <button type="button" class="action-btn" id="back-btn" title="Назад в меню">←</button>
+        <button type="button" class="action-btn" id="rewind-btn" title="Назад на 10 секунд">↺</button>
+        <button type="button" class="action-btn" id="listen-btn" title="Прослушать">▶</button>
+        <button type="button" class="action-btn" id="forward-btn" title="Вперёд на 10 секунд">↻</button>
+        <div class="timeline-wrap">
+          <input type="range" id="tts-progress" class="timeline-slider" min="0" max="1000" value="0" step="1" title="Позиция озвучки">
+        </div>
+        <button type="button" class="action-btn" id="settings-btn" title="Настройки озвучки" aria-expanded="false">⚙</button>
+      </div>
+      <div class="action-group right-group">
+        <button type="button" class="action-btn" id="print-btn" title="Печать" disabled>🖨</button>
+        <button type="button" class="action-btn" id="pdf-btn" title="PDF" disabled>📄</button>
+        <button type="button" class="action-btn" id="original-btn" title="Оригинал" disabled>🔗</button>
+      </div>
+      <div class="settings-panel" id="tts-settings-panel">
+        <div class="settings-row">
+          <label class="settings-label" for="tts-voice-filter">Язык голосов</label>
+          <select id="tts-voice-filter" class="settings-select" title="Язык голосов">
+            <option value="lesson">Язык урока</option>
+            <option value="ru">Русский</option>
+            <option value="en">English</option>
+            <option value="he">עברית</option>
+            <option value="all">Все</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <label class="settings-label" for="tts-voice">Голос</label>
+          <select id="tts-voice" class="settings-select" title="Голос"></select>
+        </div>
+        <div class="settings-row">
+          <label class="settings-label" for="tts-speed">Скорость</label>
+          <select id="tts-speed" class="settings-select" title="Скорость">
+            <option value="0.75">0.75×</option>
+            <option value="1" selected>1.0×</option>
+            <option value="1.25">1.25×</option>
+            <option value="1.5">1.5×</option>
+            <option value="1.75">1.75×</option>
+            <option value="2">2.0×</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="tts-status" id="tts-status" role="status" aria-live="polite"></div>
+    <div class="voice-help" id="voice-help-modal" aria-hidden="true">
+      <div class="voice-help-dialog">
+        <h3>🎧 Как включить приятный мужской голос для озвучки уроков?</h3>
+        <p>По умолчанию устройство может использовать стандартный женский голос. Если хотите более глубокое и приятное мужское звучание, выполните простую разовую настройку для своей платформы.</p>
+
+        <h4>Apple (Mac / iPhone / iPad)</h4>
+        <ol>
+          <li>Откройте <strong>Системные настройки (System Settings / Settings)</strong> → <strong>Универсальный доступ (Accessibility)</strong> → <strong>Устный контент (Spoken Content)</strong>.</li>
+          <li>В пункте <strong>Системный голос (System Voice)</strong> выберите <strong>Управление голосами... (Manage Voices...)</strong>.</li>
+          <li>Найдите <strong>Русский (Russian)</strong> и скачайте голос <strong>Yuri (Юрий)</strong>. Лучше всего подходит версия <strong>«Улучшенный» (Premium / Enhanced)</strong>.</li>
+          <li>После установки просто обновите страницу урока.</li>
+        </ol>
+
+        <h4>Windows 10 / 11</h4>
+        <ol>
+          <li>Откройте <strong>Параметры (Settings, Win + I)</strong> → <strong>Время и язык (Time &amp; language)</strong> → <strong>Распознавание речи (Speech)</strong>.</li>
+          <li>В разделе <strong>Голоса (Voices)</strong> убедитесь, что установлен пакет для русского языка.</li>
+          <li>Выберите в качестве системного голоса <strong>Microsoft Pavel (Павел)</strong>.</li>
+          <li>Перезапустите браузер и затем обновите страницу урока.</li>
+        </ol>
+
+        <h4>Android (Смартфоны)</h4>
+        <ol>
+          <li>Откройте <strong>Настройки (Settings)</strong> → <strong>Расширенные настройки (Additional settings)</strong> или <strong>Доступность (Accessibility)</strong> → <strong>Язык и ввод (Languages &amp; input)</strong> → <strong>Синтез речи (Text-to-speech output)</strong>.</li>
+          <li>Проверьте, что выбран <strong>Синтезатор речи Google (Speech Services by Google)</strong>, и нажмите на иконку шестерёнки рядом с ним.</li>
+          <li>Выберите <strong>Установка голосовых данных (Install voice data)</strong> → <strong>Русский (Russian)</strong>.</li>
+          <li>Выберите мужской вариант — обычно это <strong>Голос №2</strong>, <strong>Голос №3</strong> или голос с пометкой <strong>male</strong>.</li>
+        </ol>
+
+        <p>После завершения настройки обновите страницу — сайт автоматически подхватит новый голос, если он доступен браузеру.</p>
+        <button type="button" class="action-btn voice-help-close" id="voice-help-close">Понятно</button>
+      </div>
+    </div>
+    <h1>Назад в будущее. Парашат Ки Теце</h1>
+    <div class="meta"><strong>Р. Аарон Леви</strong><br>2026-08-21T18:07:00</div>
+    <div class="engagement-strip" id="engagement-bar">
+      <button type="button" class="engagement-btn" id="like-btn" title="Поставить лайк публикации" aria-label="Поставить лайк публикации" onclick="window.__lessonToggleLike && window.__lessonToggleLike(event)">
+        <span aria-hidden="true">👍</span>
+        <span class="engagement-count" id="like-count">0</span>
+      </button>
+      <a class="engagement-btn" id="contact-admin-btn" href="#" target="_blank" rel="noopener noreferrer" title="Связаться с админом в WhatsApp" aria-label="Связаться с админом в WhatsApp">
+        <span aria-hidden="true" class="whatsapp-icon">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M27.2 4.7A15.2 15.2 0 0 0 3.4 23.3L1.5 30.5l7.4-1.9A15.2 15.2 0 1 0 27.2 4.7Z" fill="#25D366"/>
+            <path d="M25.8 16.1c0 5.4-4.4 9.7-9.8 9.7-1.7 0-3.3-.4-4.7-1.2l-.3-.2-4.4 1.1 1.2-4.2-.2-.3a9.64 9.64 0 0 1-1.5-5c0-5.4 4.4-9.7 9.8-9.7 2.6 0 5 1 6.9 2.8a9.52 9.52 0 0 1 3 7Z" fill="#25D366"/>
+            <path d="M13.1 11.2c-.2-.5-.4-.5-.6-.5h-.5c-.2 0-.6.1-.9.4-.3.4-1.2 1.1-1.2 2.7s1.2 3.2 1.4 3.4c.2.2 2.3 3.7 5.8 5 .8.3 1.4.5 1.9.6.8.2 1.5.2 2.1.1.6-.1 1.8-.8 2.1-1.6.3-.8.3-1.5.2-1.6-.1-.1-.4-.2-.9-.5-.5-.2-2.1-1-2.4-1.1-.3-.1-.6-.2-.8.2-.2.3-.9 1.1-1.1 1.4-.2.2-.4.3-.8.1-.5-.2-1.9-.7-3.5-2.2-1.3-1.1-2.1-2.4-2.3-2.8-.2-.4 0-.6.1-.8.1-.1.2-.3.4-.5.1-.2.2-.3.3-.6.1-.2 0-.5 0-.6 0-.2-.7-1.8-1-2.5Z" fill="white"/>
+          </svg>
+        </span>
+      </a>
+      <div class="engagement-success" id="engagement-success" role="status" aria-live="polite"></div>
+      <div class="engagement-error" id="engagement-error" role="status" aria-live="polite"></div>
+    </div>
+    <article id="lesson-text"><p>Назад в будущее. Парашат Ки Теце <br>
+р.Аарон Леви<span class="sr-only">.</span></p>
+<p>Здравствуйте! Эту историю я услышал за несколько дней до начала месяца элул.</p>
+<p>Он подошёл ко мне после лекции, которую я читал для учащихся иешивы, пришедших на учебу, и попросил подвезти его до машины.</p>
+<p><em>«Я студент иешивы, — сказал он, — самый обычный. Я люблю Тору. И мне нравится заниматься ею. Я попросил поговорить с тобой, Аарон, не потому, что у меня есть вопросы по вере, и не из-за каких-то эмоциональных или социальных проблем, вовсе нет. Меня считают парнем, за которым идут в иешиве, как в плане учебы, так и в социуме. Я попросил поговорить с тобой, потому что через несколько дней начинается месяц элул, а этот месяц мне особенно не мил. Только подумаю об этом месяце [недовольное фырканье] — и сомневаюсь, стоит ли вообще возвращаться в иешиву, которую я так люблю»</em>.</p>
+<p>Меня это очень удивило, сказал я ему: как это студент иешивы не любит месяц элул? Элул — это месяц, ради которого вообще стоит учиться в иешиве весь год. Элул в иешиве, сказал я ему, — это опыт, который студент уносит с собой на всю жизнь. Скажи мне, какой студент иешивы не ждет месяца элул? Это месяц, который должен зарязить батарейку каждого студента иешивы на весь год. Ведь в этот месяц не нужно напрягаться, чтобы захотеть продвигаться и развиваться. В этот месяц не нужны советы, чтобы стремиться к духовному росту. Не нужны советы [недовольное фырканье], чтобы прилагать усилия и видеть, как день заканчивается еще до того, как успел начаться. Всякий, кто чувствует трепетную атмосферу этого месяца, знает, что в воздухе витает ощущение нового начала, которое очень помогает нам брать на себя новые обязательства. И чтобы именно из-за этого месяца ты не захотел возвращаться в иешиву? Скажи мне, есть ли место более подходящее, чтобы прочувствовать месяц элул, чем иешива? Скажи мне, Дуди, что же такого плохого в этом месяце? В чем твоя проблема с месяцем элул?</p>
+<p class="lesson-heading">Разочарование Дуди<span class="sr-only">.</span></p>
+<p><em>«Именно поэтому я и обратился к тебе»</em>, — весь дрожа, сказал мне Дуди. <em>«Именно это меня и расстраивает, Аарон. Мне неприятно тебе об этом рассказывать. Но как только наступает месяц элул, вокруг меня вырастает стена. Я замыкаюсь, ухожу в себя и не чувствую ничего из того, о чем ты только что сказал. И дело не в том, что я не хочу, Аарон, я очень хочу! Когда я смотрю на тех, кого месяц элул действительно волнует, во мне даже поднимается настоящая зависть, которая меня и угнетает: почему только они? Почему все чувствуют этот месяц и готовятся к нему, а я только жду, когда он закончится? Почему именно в этот месяц мне труднее молиться? Почему все рады вернуться в иешиву? А я, когда вспоминаю про месяц элул, вовсе нет... Ведь я, как я тебе уже говорил, отличный парень, Аарон, у меня нет проблем. Почему я хочу, чтобы этот столь важный месяц поскорее закончился? Вот почему я обратился к тебе, ведь [недовольное фырканье] я хочу чувствовать, Аарон, меня это по-настоящему гложет. Мне мешает то, что я ничего не чувствую. Студент иешивы, Аарон, должен [недовольное фырканье] ощущать духовную мощь, которая есть в месяце элул, и меня расстраивает, что у меня одного это не получается. Скажи, ты можешь мне объяснить, почему я ничего не чувствую?»</em></p>
+<p>И тогда, когда я улыбнулся, Дуди обиделся: <em>«Скажи, Аарон, почему ты улыбаешься? Разве ты не видишь, что у меня на глазах слезы? Разве ты не видишь, как сильно меня это беспокоит? Я сдерживаюсь и не разрываюсь в плаче только из стыда»</em>.</p>
+<p class="lesson-heading">Ответ раввина<span class="sr-only">.</span></p>
+<p><em>«Я тебе объясню»</em>, — сказал я ему. <em>«Я улыбаюсь потому, что если ты вслушаешься в то, как только что сформулировал свои слова, у меня нет сомнений, что ты тоже улыбнешься. Передо мной стоит Дуди, двадцатилетний парень со слезами на глазах, и объясняет, что плачет лишь потому, что ничего не чувствует в месяц элул, и что это причиняет ему боль и расстраивает, и умоляет меня помочь ему почувствовать то, чего он не чувствует. Ты понял, почему я улыбаюсь? Именно поэтому. Чтобы прочувствовать месяц элул, тебе не нужен я, Дуди. Ты прекрасно чувствуешь этот месяц. Ты чувствуешь его настолько сильно, что тебе мешает то, что ты его не чувствуешь. А тот, кто настолько сильно чувствует месяц элул, не нуждается в том, чтобы другие помогали ему его почувствовать»</em>.</p>
+<p><em>«Но это совсем не так»</em>, — сказал мне Дуди. <em>«Я же плачу, я ведь ничего не чувствую, так почему ты утверждаешь обратное? Что ты думаешь? Если бы я чувствовал, разве я стал бы плачь?»</em></p>
+<p><em>«Ты прав, Дуди»</em>, — сказал я ему. <em>«Я уверен, что ты уверен в том, что ничего не чувствуешь. Но с той же уверенностью я утверждаю, что на самом деле ты чувствуешь. По моему мнению, Дуди, ты чувствуешь месяц элул гораздо сильнее, чем другие парни, и именно потому, что ты чувствуешь его сильнее остальных, он тебя пугает. А из-за того, что ты пугаешься, вокруг тебя вырастает стена, и тогда ты перестаешь чувствовать. А когда ты не чувствуешь, ты пугаешься оттого, что ничего не чувствуешь, и ищешь лазейки, как бы все-таки начать чувствовать. Ну и скажи мне после этого, Дуди, можно ли чувствовать месяц элул еще сильнее?!»</em></p>
+<p><em>«Ты абсолютно прав»</em>, — сказал мне Дуди. <em>«Ты меня раскусил. Месяц элул действительно меня пугает. Но почему, как ты думаешь, я строю стену, чтобы его не чувствовать, а потом плачу? Почему я не чувствую его?»</em></p>
+<p>Почему возводится стена?</p>
+<p><em>«Очень просто»</em>, — сказал я ему. <em>«Ты строишь вокруг себя стену только потому, что прекрасно осознаешь колоссальную важность месяца милосердия и прощения. И, как я уже сказал, даже сильнее других. А поскольку ты осознаешь этот месяц именно так, ты хочешь взять на себя много хороших обязательств и исправиться. Но ровно в тот момент, когда ты думаешь об этом, ты вспоминаешь прошлый месяц элул и позапрошлый, и то, что в них, Дуди, ты тоже брал на себя обязательства и хотел исправиться, но, несмотря на сильное желание, не смог удержать принятые решения, не изменился и остался тем же, кем был. И тогда, вспоминая об этом, ты объясняешь себе, что если у тебя не получилось, то лишь потому, что ты несерьезен, что у тебя, видимо, нет слова, что ты, наверное, не такой уж великий праведник, как тебе кажется, и что трепет перед Небесами в тебе не так уж силен, как тебе мнится, и что на самом деле ты — нечто вроде духовного нуля, Дуди, и нет никакого смысла повторять эту ошибку только для того, чтобы окончательно закрепить за собой статус духовного нуля»</em>.</p>
+<p><em>«Это очень верно»</em>, — с горькой улыбкой сказал мне Дуди. <em>«Все именно так. Но это как раз то, что я пытаюсь понять: почему я замыкаюсь? Почему из-за этого я перестаю чувствовать?»</em></p>
+<p><em>«Очень просто»</em>, — сказал я ему. <em>«Потому что в тебе трепета перед Небесами гораздо больше, чем ты себе приписываешь, и потому что ты действительно трепещешь перед судом, который вершится в Рош а-Шана, и потому что ты уверен, что у тебя на самом деле нет шансов продвинуться и выйти правым в суде. И чтобы не впасть в еще большее отчаяние, ты строишь вокруг себя стену, которая скроет от тебя эти дни. Ты строишь ее для того, чтобы месяц элул тебя окончательно не раздавил. Вот почему я сказал тебе пару минут назад, что ты чувствуешь месяц элул сильнее остальных. Ты, Дуди, чувствуешь его настолько сильно, что именно поэтому строишь стену, которая скрывает его от тебя. Понял, Дуди? Твоя проблема не в том, что ты не чувствуешь месяц элул, а в неудачах, которые ты пережил в прошлые элулы. Ты прячешься от тех неудач, чтобы они еще больше не подточили твой образ и твою самооценку, которые месяц элул подрывает у тебя каждый год заново. Поэтому, чтобы снова начать чувствовать месяц элул, но позитивным образом, Дуди... Вместо того чтобы плакать из-за того, что ты ничего не чувствуешь, может, поищешь способ удерживать обязательства, которые хочешь на себя взять? И когда это произойдет, ты обнаружишь, что весь год ждешь месяца, от которого бежишь лишь потому, что чувствуешь его слишком сильно»</em>.</p>
+<p><em>«И есть такой способ?»</em> — спросил его Дуди.</p>
+<p class="lesson-heading">Совет духовного руководителя<span class="sr-only">.</span></p>
+<p><em>«Определенно»</em>, — сказал я ему. <em>«Точнее, это не совсем способ. Это изменение мышления, которому я научился у моего праведного духовного руководителя в иешиве, раби Цви-Аира Шапиры, да будет благословенна его память. Однажды, когда я зашел к нему в комнату пожаловаться на то, что я топчусь на месте и не продвигаюсь, духовный руководитель, да будет память праведника благословенна, посмотрел на меня любящим взглядом и сказал с улыбкой примерно следующее: &quot;Жизнь, Аарон, проходит очень быстро. Гораздо быстрее, чем ты думаешь. Ты, конечно, молодой парень, но знай, что старость приходит намного быстрее, чем тебе кажется. Я тоже, Аарон, был в твоем возрасте, и мне тоже казалось, что некуда и незачем спешить. Но сегодня, когда у меня и белая борода, и опыт, — сказал мне духовный руководитель, — я могу сказать тебе, что это утверждение верно до боли. Жизнь действительно проходит быстро, Аарон. Используй ее по максимуму. Используй те дни, пока ты здесь. Если ты не сделаешь этого сейчас, ты будешь жалеть всю жизнь. Не думай как молодой парень, — сказал мне духовный руководитель. — Думай как старик. Используй каждый момент&quot;»</em>.</p>
+<p>По правде говоря, сказал я Дуди, я вышел от духовного руководителя немного разочарованным, я ждал чего-то другого. Какая спешка? Какая спешка? Каждый день в иешиве тянется так медленно. Но несмотря на то, что я так думал, из-за того, что я очень восхищался им, знал, что он любит меня и желает мне добра, я решил последовать его совету. И сегодня, оглядываясь назад, Дуди, я могу с уверенностью сказать тебе, что на многих перекрестках жизни я принимал решения по его совету. Я принимал решения не исходя из настоящего, а исходя из будущего. Когда мне нужно было принять решение, я вспоминал совет духовного руководителя, да будет память праведника благословенна, и спрашивал себя: <em>«Скажи, Аарон, будешь ли ты через 50 лет рад, что принял именно это решение, или, может быть, пожалеешь, что не поступил иначе?»</em> И только в свете ответа, который я давал себе, я принимал решения. Да, это получалось не всегда, но по сей день я рад тем решениям, которые принял в свете его совета, и сожалею о тех решениях, которые принял не по нему.</p>
+<p>Понял, Дуди? Из совета духовного руководителя я усвоил, что для того, чтобы продвигаться в служении Всевышнему, недостаточно просто решить продвигаться. Решать, конечно, важно. Невозможно продвигаться без принятия решений. Но чтобы преуспеть в продвижении, а не только решить продвигаться, мне нужно вести себя не так, как тот, кто я есть сегодня, а так, как тот, кем я хочу быть завтра. Не как молодой парень, как сказал духовный руководитель, а как старик.</p>
+<p>Скажи мне, Дуди, знаешь ли ты в мире хоть одного человека, который не хочет продвигаться или развиваться? Знаешь ли ты людей, которые не хотят быть праведниками, богачами, мудрецами или хорошими людьми? Таких людей нет. Все хотят продвигаться. Но если все хотят продвигаться, Дуди, то почему одни преуспевают в этом, а другие нет? Очень просто, сказал я ему: те, кто преуспел, — это те, кто принимал решения в настоящем, руководствуясь своими устремлениями в будущем. Те, кто решал сегодня не на основе того, кто они есть сегодня, а на основе того, кем они хотят быть завтра. Чтобы стать богачом, Дуди, недостаточно просто хотеть; чтобы стать богачом, человек должен мыслить как богач, несмотря на то, что в настоящем он все еще бедняк. Он должен спросить себя: <em>«Если бы я был богат сегодня, принял ли бы я такое же решение, как сейчас?»</em> И принимать решение только на основе этого вывода. Именно это, Дуди, проводит грань между теми, кто хотел и не смог продвинуться, и теми, кто тоже хотел продвинуться, но и преуспел. Никто, Дуди, не рождается праведником, и никто не рождается богачом. Праведники и богачи стали праведниками и богачами именно потому, что жили в настоящем и принимали в нем решения не на основе того, кем они были в настоящем, а на основе того, кем они хотят быть в будущем.</p>
+<p>Так что если ты тоже хочешь быть знатоком Торы, богобоязненным человеком или обладателем хороших качеств характера, тебе нужно принимать решения в настоящем, Дуди, так, будто ты уже в будущем. Ты должен спросить себя: <em>«Что сделал бы в этой ситуации тот Дуди, которым я хочу быть, а не тот Дуди, которым я являюсь сейчас?»</em> И когда ты начнешь вести себя так, дойдя до будущего, ты обнаружишь, что оно полностью соответствует твоим ожиданиям. И когда это произойдет, стены, выросшие вокруг тебя в месяц элул каждый год, рухнут в одно мгновение, потому что ты больше не оступишься. А когда не оступаешься, не чувствуешь себя злодеем. А тот, кто не чувствует себя злодеем, Дуди, радуется приходу месяца элул, а не сожалеет о его приближении и не ждет, когда он закончится.</p>
+<p><em>«Это звучит очень логично»</em>, — сказал мне Дуди через несколько секунд. <em>«Но откуда твой духовный руководитель этому научился? Где он видел этот метод?»</em></p>
+<p class="lesson-heading">Метод из недельной главы<span class="sr-only">.</span></p>
+<p><em>«Я не знаю»</em>, — сказал я ему. <em>«По сей день я сожалею, что не спросил его, где он этому научился. Но хотя я не знаю, вполне возможно, что он почерпнул это из недельной главы. В недельной главе Ки Теце Моше-рабейну учит сынов Израиля закону об опечаленной красоткой пленной женщине, как сказано: “Если выйдешь на войну против врагов твоих, и предаст их Господь, Бог твой, в руки твои, и возьмешь ты пленного из них, и увидишь среди пленных женщину, красивую видом, и возжелаешь ее, и возьмешь ее себе в жены”. После этого приводится еще один закон: отец должен выделить первенцу двойную долю в наследстве по сравнению с остальными детьми, даже если он сын нелюбимой жены, как сказано: “Если будут у человека две жены — одна любимая, а другая нелюбимая, и родят они ему сыновей, любимая и нелюбимая, и будет первенец от нелюбимой... не сможет он сделать первенцем сына любимой в ущерб сыну нелюбимой, первенцу”. И сразу после этого, Дуди, после этих двух заповедей Моше учит сынов Израиля еще одному закону, касающемуся непокорного и буйного сына, как сказано: “Если будет у человека сын непокорный и буйный, не слушающийся голоса отца своего и голоса матери своей, и накажут они его, то пусть схватят его отец его и мать его, и приведут его к старейшинам города своего и к воротам места своего”. Скажи, Дуди, видишь ли ты какую-то связь между этими законами — об опечаленной красоткой пленной женщине, о нелюбимой жене и о непокорном сыне?»</em></p>
+<p>Так вот, по мнению Раши, Дуди, ответ на этот вопрос утвердительный, и вот что он пишет от имени Мидраша: <em>«И возьмешь ее себе в жены»</em>, — пишет Раши: <em>«Тора говорит здесь лишь в противовес дурному началу, ибо если Всевышний не разрешил бы ее, он овладел бы ею запретным образом»</em>. Но говорит Раши: <em>«Если он женится на ней, в конце концов он возненавидит ее, как сказано после этого: “Если будут у человека...”, и в конце концов у него родится от нее непокорный и буйный сын. Именно поэтому эти отрывки следуют друг за другом»</em>, — говорит Раши.</p>
+<p>Понял, Дуди? По мнению Раши, Моше-рабейну учит сынов Израиля этим законам именно в таком порядке, чтобы показать им: несмотря на то, что Тора разрешила человеку взять в жены пленную красавицу, он должен знать перед тем, как принять такое решение, что у этого шага будут последствия — если не в настоящем, то в будущем. Он учит сынов Израиля, что стих о нелюбимой жене появляется после закона о пленной красавице, а стих о непокорном и буйном сыне — после отрывка о нелюбимой жене, чтобы предостеречь того, кто отправляется на войну и хочет взять пленную красавицу лишь потому, что в настоящем его атакует дурное начало. Прежде чем он решит, что делать в настоящем, ему стоит подумать о будущем. Моше-рабейну говорит ему: если бы ты знал, что в будущем ты возненавидишь женщину, которую вожделеешь в настоящем, женился ли бы ты на ней? Если бы ты знал, какие сыновья родятся у тебя от женщины, которую ты так сильно хочешь, уступил ли бы ты настоящему или принял бы решение на основе будущего?</p>
+<p>Понял, Дуди? Моше-рабейну соединяет эти отрывки друг с другом, чтобы научить поколения тому, что решения, принимаемые нами в настоящем, имеют последствия для нашего будущего, но главным образом для того, чтобы показать: чтобы в будущем стать теми, кем мы хотим быть в настоящем, мы должны принимать решения в настоящем так, будто мы уже в будущем — будто прямо сейчас в настоящем мы уже те, кем хотим быть в будущем. В законе о пленной красавице Моше учит сынов Израиля: несмотря на то, что в настоящем Тора разрешает человеку взять в плененную красавицу, чтобы прийти к будущему и не сожалеть о решениях, принятых в прошлом лишь потому, что мы жили настоящим, мы должны ощущать в настоящем так, будто мы уже в будущем, и принимать решения исключительно на основе этого ощущения. И когда это произойдет, несмотря на то, что Тора разрешает взять пленную красавицу, отправляющийся на войну не возьмет ее. И это верно, Дуди, это верно не только в духовном развитии, это верно в любой сфере, даже в выборе спутника или спутницы жизни. Если ты хочешь быть, Дуди, человеком с хорошими качествами характера, веди себя с собой сегодня так, будто ты уже таков. Если ты хочешь быть знатоком Торы, действуй в настоящем так, будто ты уже знаток Торы, даже если это еще не так. Ты хочешь жениться — выбери себе жену, Дуди, выбери ту, которая подходит тому, кем ты хочешь быть, а не тому, кто ты есть сейчас.</p>
+<p class="lesson-heading">Заключение<span class="sr-only">.</span></p>
+<p>Понял? Вести себя сегодня так, как ты хочешь выглядеть завтра, — в этом секрет успеха тех, кто воплотил свои стремления в жизнь. И если ты будешь вести себя так, Дуди, тебя ждет успех. А если преуспеешь, стены рухнут. Ведь если ты хочешь быть знатоком Торы и богобоязненным человеком, и если ты поведешь себя сегодня так, как хочешь выглядеть завтра, то ты уже сегодня станешь вести себя как знаток Торы и богобоязненный человек. А знаток Торы и богобоязненный человек, Дуди, не боится и не страшится месяца элул. Не потому, что ему нечего бояться, а потому, что тот, кто живет в настоящем как в будущем, весь год ведет себя как в месяце элул. Ведь он ведет себя сегодня так, будто уже наступило завтра, а завтра, Дуди, начинается месяц элул. И поэтому, поскольку он сегодня ведет себя как завтра, он весь год ведет себя как в месяце элул, хотя элул еще не наступил. И поэтому, когда приходит этот месяц, в свете которого он жил весь год, он искренне радуется, а вовсе не печалится.</p>
+<p>И тогда, когда я тронулся с места, Дуди махнул мне рукой, чтобы я остановился, и попросил опустить окно. <em>«Знаешь, Аарон, — сказал он мне, — я верю, что всем понравилась твоя лекция. Но я...»</em> — сказал он со слезами на глазах: <em>«Я хочу, чтобы ты знал: ты приехал сюда не ради них. Тебя послали сюда только ради меня. Ты даже не представляешь, что то, что ты мне сейчас сказал, сделало со мной. И если бы твой духовный руководитель был еще жив, я бы поехал на край света, только чтобы сказать ему спасибо. Шабат шалом»</em>.</p></article>
+  </main>
+  <script>
+    const TTS_VOICE_KEY = 'lesson_tts_voice';
+    const TTS_VOICE_FILTER_KEY = 'lesson_tts_voice_filter';
+    const TTS_RATE_KEY = 'lesson_tts_rate';
+    const TTS_ACTIVE_LESSON_KEY = 'lesson_tts_active_lesson';
+    const TTS_PLAYBACK_STATE_KEY = 'lesson_tts_playback_state';
+    const SUPABASE_URL = 'https://odbdyleemkvghmwcwxqi.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_sAdvoyW0Y01RosCZnyFPPw_Uurp_Xq6';
+    const SITE_KEY = 'lessons';
+    const WHATSAPP_NUMBER = '972545454333';
+    const VISITOR_ID_KEY = 'site_visitor_id_v1';
+    const REACTION_TYPE = 'like';
+    const lessonPassport = JSON.parse(document.getElementById('lesson-passport')?.textContent || '{}');
+    const lessonTextEl = document.getElementById('lesson-text');
+    const listenBtn = document.getElementById('listen-btn');
+    const rewindBtn = document.getElementById('rewind-btn');
+    const forwardBtn = document.getElementById('forward-btn');
+    const progressEl = document.getElementById('tts-progress');
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsPanel = document.getElementById('tts-settings-panel');
+    const voiceFilterEl = document.getElementById('tts-voice-filter');
+    const voiceEl = document.getElementById('tts-voice');
+    const voiceHelpModal = document.getElementById('voice-help-modal');
+    const voiceHelpClose = document.getElementById('voice-help-close');
+    const speedEl = document.getElementById('tts-speed');
+    const ttsStatusEl = document.getElementById('tts-status');
+    const likeBtn = document.getElementById('like-btn');
+    const likeCountEl = document.getElementById('like-count');
+    const engagementSuccessEl = document.getElementById('engagement-success');
+    const engagementErrorEl = document.getElementById('engagement-error');
+    const contactAdminBtn = document.getElementById('contact-admin-btn');
+    const synth = window.speechSynthesis;
+    let activeUtterance = null;
+    let allVoices = [];
+    let availableVoices = [];
+    let speechTextCache = '';
+    let currentChunkStart = 0;
+    let currentCharIndex = 0;
+    let lastBoundaryAt = 0;
+    let isSeeking = false;
+    let speechStartTimer = null;
+    let lastManualPlayAttemptAt = 0;
+    let playbackSessionId = 0;
+    let likeState = { count: 0, liked: false };
+    const SEEK_STEP_SECONDS = 10;
+    const BASE_CHARS_PER_SECOND = 14;
+    const MAX_CHUNK_CHARS = 900;
+
+    function slugify(value) {
+      return String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/ё/g, 'е')
+        .replace(/\s+/g, '_')
+        .replace(/[^\p{L}\p{N}_-]+/gu, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_+|_+$/g, '') || 'lesson';
+    }
+
+    function buildContentId(passport = {}, filePath = '') {
+      const explicit = passport.lesson_id;
+      if (explicit) return slugify(explicit);
+
+      const authorToken = slugify(passport.author || 'lesson');
+      const dateToken = String(passport.date || '').replace(/\D+/g, '').slice(0, 12) || 'nodate';
+      const sourceValue = passport.source || '';
+      const sourceBase = sourceValue.split('/').pop()?.replace(/\.[^.]+$/i, '') || '';
+      const fileBase = String(filePath || '').split('/').pop()?.replace(/\.html?$/i, '') || '';
+      const primaryToken = slugify(sourceBase || fileBase || passport.title || 'lesson');
+      return `${authorToken}-${dateToken}-${primaryToken}`;
+    }
+
+    function getPageFilePath() {
+      const pathname = decodeURIComponent(window.location.pathname || '');
+      const marker = '/Library/';
+      const index = pathname.indexOf(marker);
+      return index >= 0 ? pathname.slice(index + 1) : '';
+    }
+
+    function getCurrentContentId() {
+      return buildContentId(lessonPassport, getPageFilePath());
+    }
+
+    function getOrCreateVisitorId() {
+      let visitorId = localStorage.getItem(VISITOR_ID_KEY);
+      if (visitorId) return visitorId;
+      if (window.crypto?.randomUUID) {
+        visitorId = window.crypto.randomUUID();
+      } else {
+        visitorId = `visitor_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+      }
+      localStorage.setItem(VISITOR_ID_KEY, visitorId);
+      return visitorId;
+    }
+
+    function getSupabaseHeaders(prefer = '') {
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      };
+      if (prefer) headers['Prefer'] = prefer;
+      return headers;
+    }
+
+    function setEngagementError(message) {
+      if (!engagementErrorEl) return;
+      engagementErrorEl.textContent = message || '';
+      engagementErrorEl.classList.toggle('visible', Boolean(message));
+    }
+
+    function setEngagementSuccess(message) {
+      if (!engagementSuccessEl) return;
+      engagementSuccessEl.textContent = message || '';
+      engagementSuccessEl.classList.toggle('visible', Boolean(message));
+    }
+
+    function updateLikeUI() {
+      if (likeCountEl) likeCountEl.textContent = String(likeState.count || 0);
+      if (likeBtn) likeBtn.classList.toggle('active', Boolean(likeState.liked));
+      if (likeBtn) {
+        const label = likeState.liked ? 'Ваш лайк учтён' : 'Поставить лайк публикации';
+        likeBtn.title = `${label} (${likeState.count || 0})`;
+        likeBtn.setAttribute('aria-label', `${label}. Всего лайков: ${likeState.count || 0}`);
+      }
+      setEngagementSuccess('');
+    }
+
+    async function fetchLikeState() {
+      const lessonId = getCurrentContentId();
+      const visitorId = getOrCreateVisitorId();
+      const base = `${SUPABASE_URL}/rest/v1/content_reactions`;
+      const commonHeaders = getSupabaseHeaders();
+      const idFilter = `content_id=eq.${encodeURIComponent(lessonId)}`;
+      const countUrl = `${base}?select=content_id&site_key=eq.${encodeURIComponent(SITE_KEY)}&${idFilter}&reaction_type=eq.${REACTION_TYPE}`;
+      const myLikeUrl = `${base}?select=id,content_id&site_key=eq.${encodeURIComponent(SITE_KEY)}&${idFilter}&reaction_type=eq.${REACTION_TYPE}&visitor_id=eq.${encodeURIComponent(visitorId)}&limit=10`;
+
+      const [countRes, myLikeRes] = await Promise.all([
+        fetch(countUrl, { headers: { ...commonHeaders, Prefer: 'count=exact' } }),
+        fetch(myLikeUrl, { headers: commonHeaders }),
+      ]);
+
+      if (!countRes.ok || !myLikeRes.ok) {
+        throw new Error('Не удалось загрузить состояние лайков');
+      }
+
+      const countHeader = countRes.headers.get('content-range') || '0-0/0';
+      const countValue = parseInt(countHeader.split('/')[1] || '0', 10) || 0;
+      const myLikeRows = await myLikeRes.json();
+
+      likeState = {
+        count: countValue,
+        liked: Array.isArray(myLikeRows) && myLikeRows.length > 0,
+      };
+      updateLikeUI();
+    }
+
+    async function toggleLike(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      if (!likeBtn) return;
+      likeBtn.disabled = true;
+      setEngagementError('');
+      setEngagementSuccess('');
+
+      const lessonId = getCurrentContentId();
+      const visitorId = getOrCreateVisitorId();
+      const base = `${SUPABASE_URL}/rest/v1/content_reactions`;
+
+      try {
+        if (likeState.liked) {
+          const idFilter = `content_id=eq.${encodeURIComponent(lessonId)}`;
+          const deleteUrl = `${base}?site_key=eq.${encodeURIComponent(SITE_KEY)}&${idFilter}&reaction_type=eq.${REACTION_TYPE}&visitor_id=eq.${encodeURIComponent(visitorId)}`;
+          const response = await fetch(deleteUrl, {
+            method: 'DELETE',
+            headers: getSupabaseHeaders(),
+          });
+          if (!response.ok) throw new Error('Не удалось снять лайк');
+        } else {
+          const response = await fetch(base, {
+            method: 'POST',
+            headers: {
+              ...getSupabaseHeaders('resolution=merge-duplicates,return=minimal'),
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify([{
+              site_key: SITE_KEY,
+              content_id: lessonId,
+              visitor_id: visitorId,
+              reaction_type: REACTION_TYPE,
+            }]),
+          });
+          if (!response.ok) throw new Error('Не удалось поставить лайк');
+        }
+
+        await fetchLikeState();
+      } catch (error) {
+        setEngagementError('');
+      } finally {
+        likeBtn.disabled = false;
+      }
+    }
+
+    window.__lessonToggleLike = toggleLike;
+
+    function initContactButton() {
+      if (!contactAdminBtn) return;
+      const title = lessonPassport.title || document.title || 'публикация';
+      const message = `Здравствуйте! Хочу написать по поводу публикации: $Назад в будущее. Парашат Ки Теце\n${window.location.href}`;
+      contactAdminBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+      contactAdminBtn.title = `Связаться с админом в WhatsApp: $Назад в будущее. Парашат Ки Теце`;
+      contactAdminBtn.setAttribute('aria-label', `Связаться с админом в WhatsApp по публикации $Назад в будущее. Парашат Ки Теце`);
+    }
+
+    function getLessonLang() {
+      return (lessonPassport.lang || 'ru') === 'he' ? 'he-IL' : ((lessonPassport.lang || 'ru') === 'en' ? 'en-US' : 'ru-RU');
+    }
+
+    function getPreferredVoiceUri() {
+      return localStorage.getItem(TTS_VOICE_KEY) || '';
+    }
+
+    function getPreferredVoiceFilter() {
+      return localStorage.getItem(TTS_VOICE_FILTER_KEY) || 'lesson';
+    }
+
+    function getPreferredRate() {
+      return localStorage.getItem(TTS_RATE_KEY) || '1';
+    }
+
+    function getLessonFilePath() {
+      const pathname = decodeURIComponent(window.location.pathname || '');
+      const marker = '/Library/';
+      const index = pathname.indexOf(marker);
+      return index >= 0 ? pathname.slice(index + 1) : '';
+    }
+
+    function setPlaybackState(state) {
+      const lessonPath = getLessonFilePath();
+      if (lessonPath) localStorage.setItem(TTS_ACTIVE_LESSON_KEY, lessonPath);
+      localStorage.setItem(TTS_PLAYBACK_STATE_KEY, state);
+    }
+
+    function syncPlaybackState() {
+      if (!synth) {
+        clearPlaybackState();
+        return;
+      }
+
+      const lessonPath = getLessonFilePath();
+      if (!lessonPath) return;
+
+      if (synth.speaking && !synth.paused) {
+        localStorage.setItem(TTS_ACTIVE_LESSON_KEY, lessonPath);
+        localStorage.setItem(TTS_PLAYBACK_STATE_KEY, 'playing');
+        return;
+      }
+
+      if (synth.paused) {
+        localStorage.setItem(TTS_ACTIVE_LESSON_KEY, lessonPath);
+        localStorage.setItem(TTS_PLAYBACK_STATE_KEY, 'paused');
+        return;
+      }
+
+      clearPlaybackState();
+    }
+
+    function clearPlaybackState() {
+      localStorage.removeItem(TTS_ACTIVE_LESSON_KEY);
+      localStorage.removeItem(TTS_PLAYBACK_STATE_KEY);
+    }
+
+    function savePreferences() {
+      if (voiceFilterEl) localStorage.setItem(TTS_VOICE_FILTER_KEY, voiceFilterEl.value || 'lesson');
+      if (voiceEl) localStorage.setItem(TTS_VOICE_KEY, voiceEl.value || '');
+      if (speedEl) localStorage.setItem(TTS_RATE_KEY, speedEl.value || '1');
+    }
+
+    function getCurrentRate() {
+      return parseFloat(speedEl?.value || getPreferredRate() || '1') || 1;
+    }
+
+    function normalizeVoiceLang(lang) {
+      return (lang || '').toLowerCase();
+    }
+
+    function getVoiceFilterValue() {
+      return voiceFilterEl?.value || getPreferredVoiceFilter() || 'lesson';
+    }
+
+    function voiceMatchesFilter(voice, filterValue) {
+      const voiceLang = normalizeVoiceLang(voice?.lang);
+      const lessonLang = getLessonLang().toLowerCase();
+      const lessonRoot = lessonLang.split('-')[0];
+
+      if (filterValue === 'all') return true;
+      if (filterValue === 'lesson') {
+        return voiceLang === lessonLang || voiceLang.startsWith(lessonRoot);
+      }
+      if (filterValue === 'ru') return voiceLang.startsWith('ru');
+      if (filterValue === 'en') return voiceLang.startsWith('en');
+      if (filterValue === 'he') return voiceLang.startsWith('he') || voiceLang.startsWith('iw');
+      return true;
+    }
+
+    function getVoiceFilterLabel(filterValue) {
+      if (filterValue === 'ru') return 'Русский';
+      if (filterValue === 'en') return 'English';
+      if (filterValue === 'he') return 'עברית';
+      if (filterValue === 'all') return 'Все';
+      return 'Язык урока';
+    }
+
+    function updateListenButton() {
+      if (!listenBtn) return;
+      if (!synth) {
+        listenBtn.textContent = '×';
+        listenBtn.title = 'Озвучка недоступна';
+        listenBtn.disabled = true;
+        return;
+      }
+      if (synth.paused) {
+        listenBtn.textContent = '▶';
+        listenBtn.title = 'Продолжить';
+        return;
+      }
+      if (synth.speaking) {
+        listenBtn.textContent = '⏸';
+        listenBtn.title = 'Пауза';
+        return;
+      }
+      listenBtn.textContent = '▶';
+      listenBtn.title = 'Прослушать';
+    }
+
+    function showTtsStatus(message) {
+      if (!ttsStatusEl) return;
+      ttsStatusEl.textContent = message || '';
+      ttsStatusEl.classList.toggle('visible', Boolean(message));
+    }
+
+    function clearTtsStatus() {
+      showTtsStatus('');
+    }
+
+    function clearSpeechStartTimer() {
+      if (speechStartTimer) {
+        window.clearTimeout(speechStartTimer);
+        speechStartTimer = null;
+      }
+    }
+
+    function splitTextForSpeech(text, startIndex) {
+      const safeStart = Math.max(0, Math.min(startIndex || 0, Math.max(text.length - 1, 0)));
+      if (!text || safeStart >= text.length) {
+        return { chunkText: '', chunkStart: safeStart, nextIndex: safeStart };
+      }
+
+      let chunkEnd = Math.min(text.length, safeStart + MAX_CHUNK_CHARS);
+      if (chunkEnd < text.length) {
+        const punctuationMatch = text.slice(safeStart, chunkEnd).match(/[.!?…;:](?=[^.!?…;:]*$)/);
+        if (punctuationMatch && typeof punctuationMatch.index === 'number') {
+          chunkEnd = safeStart + punctuationMatch.index + 1;
+        } else {
+          const lastSpace = text.lastIndexOf(' ', chunkEnd);
+          if (lastSpace > safeStart + 80) {
+            chunkEnd = lastSpace;
+          }
+        }
+      }
+
+      const chunkText = text.slice(safeStart, chunkEnd).trim();
+      return {
+        chunkText,
+        chunkStart: safeStart,
+        nextIndex: chunkEnd,
+      };
+    }
+
+    function markManualPlayAttempt() {
+      lastManualPlayAttemptAt = Date.now();
+      if (listenBtn) {
+        listenBtn.textContent = '…';
+        listenBtn.title = 'Запуск озвучки…';
+      }
+    }
+
+    function updateProgressUI() {
+      if (!progressEl) return;
+      const totalLength = Math.max(speechTextCache.length, 1);
+      const nextValue = Math.max(0, Math.min(1000, Math.round((currentCharIndex / totalLength) * 1000)));
+      if (!isSeeking) progressEl.value = String(nextValue);
+    }
+
+    function getLessonText() {
+      if (!lessonTextEl) return '';
+      const clone = lessonTextEl.cloneNode(true);
+      clone.querySelectorAll('.tts-ignore, [aria-hidden="true"]').forEach((node) => node.remove());
+      return (clone.innerText || clone.textContent || '')
+        .replace(/[«»“”„‟‹›'"`]+/g, ' ')
+        .replace(/[\\/|]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function stopSpeech(updateButton = true) {
+      clearSpeechStartTimer();
+      playbackSessionId += 1;
+      if (synth) synth.cancel();
+      activeUtterance = null;
+      currentChunkStart = 0;
+      clearPlaybackState();
+      lastBoundaryAt = 0;
+      if (updateButton) updateListenButton();
+    }
+
+    function clampCharIndex(index) {
+      return Math.max(0, Math.min(index, Math.max(speechTextCache.length - 1, 0)));
+    }
+
+    function estimateCharsForSeconds(seconds) {
+      return Math.round(seconds * BASE_CHARS_PER_SECOND * getCurrentRate());
+    }
+
+    function normalizeSeekIndex(index) {
+      const target = clampCharIndex(index);
+      if (!speechTextCache) return 0;
+      if (target <= 0) return 0;
+      const prevSpace = speechTextCache.lastIndexOf(' ', target);
+      return prevSpace >= 0 ? prevSpace + 1 : target;
+    }
+
+    function seekToChar(index, autoPlay = true) {
+      speechTextCache = speechTextCache || getLessonText();
+      currentCharIndex = normalizeSeekIndex(index);
+      updateProgressUI();
+      if (synth?.speaking || synth?.paused) stopSpeech(false);
+      if (autoPlay) playSpeech(currentCharIndex);
+      else updateListenButton();
+    }
+
+    function seekBySeconds(deltaSeconds) {
+      speechTextCache = speechTextCache || getLessonText();
+      if (!speechTextCache) return;
+      const deltaChars = estimateCharsForSeconds(deltaSeconds);
+      seekToChar(currentCharIndex + deltaChars, true);
+    }
+
+    function getSelectedVoice() {
+      const selectedUri = voiceEl?.value || '';
+      return availableVoices.find(voice => voice.voiceURI === selectedUri) || null;
+    }
+
+    function pickFallbackVoice() {
+      const lessonLang = getLessonLang().toLowerCase();
+      const filterValue = getVoiceFilterValue();
+      const byFilter = availableVoices;
+      const preferredYuri = byFilter.find(voice => /yuri/i.test(`${voice.name || ''} ${voice.voiceURI || ''}`));
+      return preferredYuri
+        || byFilter.find(voice => (voice.lang || '').toLowerCase() === lessonLang)
+        || byFilter.find(voice => (voice.lang || '').toLowerCase().startsWith(lessonLang.split('-')[0]))
+        || allVoices.find(voice => voiceMatchesFilter(voice, filterValue))
+        || availableVoices[0]
+        || allVoices[0]
+        || null;
+    }
+
+    function canAssignVoice(voice) {
+      return Boolean(voice && voice.voiceURI && voice.name);
+    }
+
+    function populateVoiceOptions() {
+      if (!voiceEl) return;
+      const filterValue = getVoiceFilterValue();
+      allVoices = synth ? synth.getVoices().slice() : [];
+      availableVoices = allVoices.filter(voice => voiceMatchesFilter(voice, filterValue));
+      const preferredUri = getPreferredVoiceUri();
+
+      if (!availableVoices.length) {
+        const emptyLabel = `Голоса недоступны: ${getVoiceFilterLabel(filterValue)}`;
+        voiceEl.innerHTML = `<option value="">${emptyLabel}</option><option value="__voice_help__">Настройка голоса...</option>`;
+        return;
+      }
+
+      voiceEl.innerHTML = availableVoices.map(voice => {
+        const label = `${voice.name} (${voice.lang})${voice.default ? ' — системный' : ''}`;
+        return `<option value="${voice.voiceURI}">${label}</option>`;
+      }).join('') + '<option value="__voice_help__">Настройка голоса...</option>';
+
+      const preferredVoice = availableVoices.find(voice => voice.voiceURI === preferredUri);
+      const fallbackVoice = pickFallbackVoice();
+      voiceEl.value = (preferredVoice || fallbackVoice)?.voiceURI || '';
+      savePreferences();
+    }
+
+    function scheduleVoiceReload(attempt = 0) {
+      if (!synth) return;
+      const voices = synth.getVoices();
+      if (voices.length || attempt >= 6) {
+        populateVoiceOptions();
+        return;
+      }
+      window.setTimeout(() => scheduleVoiceReload(attempt + 1), 250 * (attempt + 1));
+    }
+
+    function toggleSettings(forceOpen) {
+      if (!settingsPanel || !settingsBtn) return;
+      const willOpen = typeof forceOpen === 'boolean' ? forceOpen : !settingsPanel.classList.contains('open');
+      settingsPanel.classList.toggle('open', willOpen);
+      settingsBtn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    }
+
+    function toggleVoiceHelp(forceOpen) {
+      if (!voiceHelpModal) return;
+      const willOpen = typeof forceOpen === 'boolean' ? forceOpen : !voiceHelpModal.classList.contains('open');
+      voiceHelpModal.classList.toggle('open', willOpen);
+      voiceHelpModal.setAttribute('aria-hidden', willOpen ? 'false' : 'true');
+    }
+
+    function playSpeech(startCharIndex = currentCharIndex, sessionId = null) {
+      speechTextCache = getLessonText();
+      const text = speechTextCache;
+      if (!text || !synth) {
+        showTtsStatus('Озвучка недоступна в этом браузере.');
+        updateListenButton();
+        return;
+      }
+
+      clearTtsStatus();
+      clearSpeechStartTimer();
+      markManualPlayAttempt();
+
+      if (sessionId === null) {
+        playbackSessionId += 1;
+        sessionId = playbackSessionId;
+      }
+
+      if (synth.speaking) synth.cancel();
+
+      currentCharIndex = normalizeSeekIndex(startCharIndex);
+      const chunk = splitTextForSpeech(text, currentCharIndex);
+      const remainingText = chunk.chunkText;
+      currentChunkStart = chunk.chunkStart;
+      if (!remainingText) {
+        currentCharIndex = 0;
+        updateProgressUI();
+        updateListenButton();
+        return;
+      }
+
+      const utterance = new SpeechSynthesisUtterance(remainingText);
+      const selectedVoice = getSelectedVoice() || pickFallbackVoice();
+      utterance.lang = selectedVoice?.lang || getLessonLang();
+      if (canAssignVoice(selectedVoice)) {
+        utterance.voice = selectedVoice;
+      }
+      utterance.rate = getCurrentRate();
+      utterance.onstart = () => {
+        if (sessionId !== playbackSessionId) return;
+        clearSpeechStartTimer();
+        lastBoundaryAt = Date.now();
+        setPlaybackState('playing');
+        updateProgressUI();
+        updateListenButton();
+        clearTtsStatus();
+      };
+      utterance.onpause = () => {
+        if (sessionId !== playbackSessionId) return;
+        setPlaybackState('paused');
+        updateListenButton();
+      };
+      utterance.onresume = () => {
+        if (sessionId !== playbackSessionId) return;
+        setPlaybackState('playing');
+        updateListenButton();
+      };
+      utterance.onend = () => {
+        if (sessionId !== playbackSessionId) return;
+        clearSpeechStartTimer();
+        activeUtterance = null;
+        currentCharIndex = chunk.nextIndex;
+        if (chunk.nextIndex < speechTextCache.length) {
+          playSpeech(chunk.nextIndex, sessionId);
+          return;
+        }
+        currentCharIndex = speechTextCache.length;
+        currentChunkStart = 0;
+        clearPlaybackState();
+        updateProgressUI();
+        updateListenButton();
+      };
+      utterance.onerror = () => {
+        if (sessionId !== playbackSessionId) return;
+        clearSpeechStartTimer();
+        activeUtterance = null;
+        clearPlaybackState();
+        updateListenButton();
+        showTtsStatus('Не удалось запустить озвучку. Попробуйте ещё раз или выберите другой голос.');
+      };
+      utterance.onboundary = (event) => {
+        if (sessionId !== playbackSessionId) return;
+        if (typeof event.charIndex === 'number') {
+          currentCharIndex = normalizeSeekIndex(currentChunkStart + event.charIndex);
+          lastBoundaryAt = Date.now();
+          updateProgressUI();
+        }
+      };
+      activeUtterance = utterance;
+      savePreferences();
+      try {
+        synth.speak(utterance);
+      } catch (_) {
+        clearSpeechStartTimer();
+        activeUtterance = null;
+        showTtsStatus('Браузер не смог запустить озвучку. Попробуйте ещё раз.');
+        updateListenButton();
+        return;
+      }
+      speechStartTimer = window.setTimeout(() => {
+        if (sessionId !== playbackSessionId) return;
+        if (!synth.speaking && !synth.paused) {
+          showTtsStatus('Первая попытка запуска не сработала, пробую безопасный режим…');
+          const fallbackUtterance = new SpeechSynthesisUtterance(remainingText);
+          fallbackUtterance.lang = getLessonLang();
+          fallbackUtterance.rate = getCurrentRate();
+          fallbackUtterance.onstart = utterance.onstart;
+          fallbackUtterance.onpause = utterance.onpause;
+          fallbackUtterance.onresume = utterance.onresume;
+          fallbackUtterance.onend = utterance.onend;
+          fallbackUtterance.onerror = utterance.onerror;
+          fallbackUtterance.onboundary = utterance.onboundary;
+          activeUtterance = fallbackUtterance;
+          try {
+            synth.cancel();
+            synth.speak(fallbackUtterance);
+          } catch (_) {
+            showTtsStatus('Озвучка не стартовала. Возможно, в браузере недоступны системные голоса.');
+          }
+        }
+      }, 500);
+      updateProgressUI();
+      updateListenButton();
+    }
+
+    function handleListenPress(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      toggleSpeech();
+    }
+
+    function toggleSpeech() {
+      if (!synth) {
+        showTtsStatus('Озвучка недоступна в этом браузере.');
+        updateListenButton();
+        return;
+      }
+      clearTtsStatus();
+      if (synth.speaking && !synth.paused) {
+        synth.pause();
+        setPlaybackState('paused');
+        updateListenButton();
+        return;
+      }
+      if (synth.paused) {
+        synth.resume();
+        setPlaybackState('playing');
+        updateListenButton();
+        return;
+      }
+      playSpeech(currentCharIndex);
+    }
+
+    document.getElementById('back-btn')?.addEventListener('click', () => {
+      window.location.href = new URL('../../index.html', window.location.href).toString();
+    });
+    listenBtn?.addEventListener('click', handleListenPress);
+    listenBtn?.addEventListener('touchend', handleListenPress, { passive: false });
+    listenBtn?.addEventListener('pointerup', handleListenPress);
+    rewindBtn?.addEventListener('click', () => seekBySeconds(-SEEK_STEP_SECONDS));
+    forwardBtn?.addEventListener('click', () => seekBySeconds(SEEK_STEP_SECONDS));
+    settingsBtn?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      toggleSettings();
+    });
+    voiceEl?.addEventListener('change', () => {
+      if (voiceEl.value === '__voice_help__') {
+        const fallbackVoice = getSelectedVoice() || pickFallbackVoice();
+        voiceEl.value = fallbackVoice?.voiceURI || '';
+        toggleVoiceHelp(true);
+        return;
+      }
+      savePreferences();
+      if (synth?.speaking || synth?.paused) {
+        stopSpeech(false);
+        playSpeech();
+      }
+    });
+    voiceFilterEl?.addEventListener('change', () => {
+      savePreferences();
+      populateVoiceOptions();
+      if (synth?.speaking || synth?.paused) {
+        stopSpeech(false);
+        playSpeech();
+      }
+    });
+    speedEl?.addEventListener('change', () => {
+      savePreferences();
+      if (synth?.speaking || synth?.paused) {
+        stopSpeech(false);
+        playSpeech(currentCharIndex);
+      }
+    });
+    progressEl?.addEventListener('input', () => {
+      isSeeking = true;
+    });
+    progressEl?.addEventListener('change', () => {
+      isSeeking = false;
+      speechTextCache = speechTextCache || getLessonText();
+      const targetIndex = Math.round((parseInt(progressEl.value || '0', 10) / 1000) * Math.max(speechTextCache.length, 1));
+      seekToChar(targetIndex, true);
+    });
+    document.addEventListener('click', (event) => {
+      if (!settingsPanel?.contains(event.target) && event.target !== settingsBtn) {
+        toggleSettings(false);
+      }
+    });
+    window.addEventListener('pagehide', syncPlaybackState);
+    window.addEventListener('beforeunload', syncPlaybackState);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        syncPlaybackState();
+      }
+    });
+    voiceHelpClose?.addEventListener('click', () => toggleVoiceHelp(false));
+    voiceHelpModal?.addEventListener('click', (event) => {
+      if (event.target === voiceHelpModal) {
+        toggleVoiceHelp(false);
+      }
+    });
+    likeBtn?.addEventListener('click', toggleLike);
+
+    if (voiceEl) voiceEl.innerHTML = '<option value="">Загрузка голосов…</option>';
+    if (voiceFilterEl) voiceFilterEl.value = getPreferredVoiceFilter();
+    if (speedEl) speedEl.value = getPreferredRate();
+    speechTextCache = getLessonText();
+    updateProgressUI();
+    populateVoiceOptions();
+    scheduleVoiceReload();
+    if (synth && typeof synth.onvoiceschanged !== 'undefined') {
+      synth.onvoiceschanged = () => {
+        populateVoiceOptions();
+        scheduleVoiceReload();
+      };
+    }
+    updateListenButton();
+    updateLikeUI();
+    initContactButton();
+    fetchLikeState().catch(() => {
+      setEngagementError('');
+    });
+
+    if (new URLSearchParams(window.location.search).get('autoplay') === '1') {
+      setTimeout(() => playSpeech(currentCharIndex), 200);
+    }
+  </script>
+</body>
+</html>
