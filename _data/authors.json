@@ -62,6 +62,13 @@
     "folder": "rav Yosef Mizrahi",
     "short_names": ["Йосеф Мизрахи", "р. Йосеф Мизрахи"],
     "aliases": ["rav yosef mizrahi", "rabbi yosef mizrahi", "yosef mizrahi"]
+    },
+    {
+    "key": "rav_yosef_tzvi_ben_porat",
+    "display_name": "Р. Йосеф Цви Бен Порат",
+    "folder": "rav Yosef Tzvi Ben Porat",
+    "short_names": ["р.Бен Порат"],
+    "aliases": ["rav yosef ben porat", "rabbi yosef ben porat", "yosef mizrahi"]
     }
   ]
 }
