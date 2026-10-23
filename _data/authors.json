@@ -69,6 +69,13 @@
     "folder": "rav Yosef Tzvi Ben Porat",
     "short_names": ["р.Бен Порат"],
     "aliases": ["rav yosef ben porat", "rabbi yosef ben porat", "yosef mizrahi"]
+    },
+    {
+    "key": "rav_asher_weiss",
+    "display_name": "Р. Ашер Вайс",
+    "folder": "rav Asher Weiss",
+    "short_names": ["р.Ашер Вайс"],
+    "aliases": ["rav Asher Weiss", "rabbi Asher Weiss", "Asher Weiss"]
     }
   ]
 }
