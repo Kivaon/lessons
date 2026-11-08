@@ -85,7 +85,7 @@
 </head>
 <body>
 <div class="container">
-    <div class="version-line">Ver. 261109.0143 &nbsp; 2026-11-09 01:43</div>
+    <div class="version-line">Ver. 261109.0155 &nbsp; 2026-11-09 01:55</div>
     <div class="toolbar">
         <input id="search-input" type="search" placeholder="Поиск по названию, автору, циклу, тегам" oninput="renderAll()">
         <select id="author-filter" onchange="renderAll()">
@@ -106,6 +106,7 @@
 
     <!-- Панель: Дерево тем -->
     <div id="topics-panel" class="panel"></div>
+    <footer style="text-align:center;margin:24px 0;font-size:12px"><a href="admin.html">Управление</a></footer>
 </div>
 
 <script>
@@ -716,5 +717,6 @@
         toggleLikeFromList(event, likeBtn.dataset.likeFilePath, likeBtn.dataset.likeId);
     });
 </script>
+<script id="lesson-analytics" src="/lessons/analytics.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Управление уроками</title>
+<style>
+*{box-sizing:border-box}body{font:16px system-ui;background:#f4f7f6;color:#243746;margin:0;padding:24px}main{max-width:1100px;margin:auto}h1{font-size:26px}section{background:white;padding:24px;border-radius:14px;margin:20px 0}label{display:inline-block;margin:6px 12px 6px 0}input,select,button{font:inherit;padding:9px;border:1px solid #bccbd7;border-radius:7px}button{cursor:pointer;background:#eef6ff;color:#175581}button:disabled{opacity:.5;cursor:wait}#notice{white-space:pre-wrap}small{color:#596c7b}.scroll{overflow:auto}table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:12px 8px;border-bottom:1px solid #e6ebef}td:first-child{min-width:220px}#search{width:min(100%,400px)}[hidden]{display:none!important}.summary{font-size:22px;margin:20px 0}.muted{color:#596c7b}
+</style></head><body><main>
+<a href="index.html">← К урокам</a><h1>Управление уроками</h1>
+<p id="notice" role="status" aria-live="polite">Войдите, чтобы увидеть статистику и управлять лайками.</p>
+<section id="login"><form id="email-form"><label>Email <input id="email" type="email" autocomplete="email" required></label><button>Получить код</button></form>
+<form id="code-form" hidden><p>Скопируйте ссылку входа из письма и вставьте сюда. Если в письме указан код, можно ввести код.</p><label>Код или ссылка <input id="code" type="text" autocomplete="one-time-code" required></label><button>Войти</button></form></section>
+<div id="dashboard" hidden>
+<button id="logout">Выйти</button>
+<section><h2>Посещения уроков</h2>
+<label>Период <select id="days"><option value="7">7 дней</option><option value="30" selected>30 дней</option><option value="90">90 дней</option></select></label>
+<button id="refresh">Обновить</button><p class="summary" id="summary"></p>
+<p class="muted">Посещения учитываются с момента подключения статистики. Посетитель определяется по этому браузеру: разные устройства считаются отдельно. Просмотр страницы не подтверждает прочтение урока.</p>
+<input id="search" type="search" placeholder="Найти урок по названию или автору" aria-label="Поиск уроков">
+<div class="scroll"><table><thead><tr><th>Урок</th><th>Просмотры</th><th>Посетители</th><th>Лайки</th><th>Управление</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+<section><h2>Добавление лайков</h2><p>Искусственные реакции. Существующие лайки не удаляются.</p>
+<label>Режим <select id="mode"><option value="fill">Заполнить до диапазона</option><option value="add">Прибавить к текущим</option></select></label>
+<label>От <input id="low" type="number" min="0" max="1000" value="9"></label><label>До <input id="high" type="number" min="0" max="1000" value="18"></label>
+<p><small>При заполнении уроки с числом лайков не ниже нижней границы пропускаются. Режим «прибавить» увеличивает значения при каждом запуске.</small></p>
+<button id="apply-all">Применить ко всем урокам</button><p><small>Кнопки в строках применяют выбранные здесь режим и диапазон к одному уроку. Фильтр поиска не ограничивает действие кнопки «ко всем».</small></p></section>
+</div></main><script>
+'use strict';
+const API='https://odbdyleemkvghmwcwxqi.supabase.co';
+const KEY='sb_publishable_sAdvoyW0Y01RosCZnyFPPw_Uurp_Xq6';
+const $=id=>document.getElementById(id);
+let catalog=[], counts=new Map(), stats=new Map(), busy=false;
+function say(text){$('notice').textContent=text;}
+async function api(path,body,authenticated=false){
+ const headers={'apikey':KEY,'Content-Type':'application/json'};
+ if(authenticated){const token=sessionStorage.getItem('lesson_admin_token');if(!token)throw Error('Войдите заново');headers.Authorization='Bearer '+token;}
+ const res=await fetch(API+path,{method:'POST',headers,body:JSON.stringify(body)});
+ const data=await res.json().catch(()=>null);
+ if(!res.ok)throw Error(data?.msg||data?.message||data?.error_description||'Не удалось выполнить запрос');
+ return data;
+}
+const rpc=(name,data={})=>api('/rest/v1/rpc/'+name,data,true);
+function lock(value){busy=value;document.querySelectorAll('button').forEach(b=>b.disabled=value);}
+function logout(){sessionStorage.removeItem('lesson_admin_token');$('dashboard').hidden=true;$('login').hidden=false;say('Вы вышли.');}
+$('email-form').onsubmit=async e=>{e.preventDefault();lock(true);try{
+ await api('/auth/v1/otp',{email:$('email').value.trim(),create_user:true});
+ $('code-form').hidden=false;say('Письмо отправлено. Скопируйте ссылку входа из письма сюда или введите код.');
+}catch(error){say(error.message);}finally{lock(false);}};
+$('code-form').onsubmit=async e=>{e.preventDefault();lock(true);try{
+ const input=$('code').value.trim();let verification;
+ if(/^https:\/\//.test(input)){
+  const link=new URL(input);if(link.origin!==API||link.pathname!=='/auth/v1/verify')throw Error('Нужна исходная ссылка входа из письма Supabase.');
+  const type=link.searchParams.get('type');if(!['signup','magiclink','email'].includes(type))throw Error('Это не ссылка входа.');
+  const token=link.searchParams.get('token_hash')||link.searchParams.get('token');if(!token)throw Error('В ссылке нет кода входа.');
+  verification={token_hash:token,type};
+ }else{verification={email:$('email').value.trim(),token:input,type:'email'};}
+ const data=await api('/auth/v1/verify',verification);
+ sessionStorage.setItem('lesson_admin_token',data.access_token);$('code').value='';await load();
+}catch(error){sessionStorage.removeItem('lesson_admin_token');say(error.message);}finally{lock(false);}};
+$('logout').onclick=async()=>{lock(true);try{await api('/auth/v1/logout',{},true);}catch(_){}finally{logout();lock(false);}};
+async function load(){
+ const allowed=await rpc('is_lesson_admin');if(!allowed)throw Error('Для этого email нет прав администратора.');
+ const [likes,visits,response]=await Promise.all([rpc('admin_lesson_counts'),rpc('admin_lesson_stats',{p_days:Number($('days').value)}),fetch('library.json',{cache:'no-store'})]);
+ if(!response.ok)throw Error('Не удалось загрузить каталог');
+ catalog=[...new Map((await response.json()).map(i=>[i.lesson_id||i.content_id,i])).values()];
+ counts=new Map(likes.map(r=>[r.content_id,Number(r.likes)]));stats=new Map(visits.map(r=>[r.content_id,r]));
+ $('login').hidden=true;$('dashboard').hidden=false;render();say('Данные обновлены.');
+}
+function render(){
+ $('rows').replaceChildren();const query=$('search').value.toLowerCase();
+ let total=0;for(const [id,s] of stats)if(id!=='__catalog__')total+=Number(s.views);
+ $('summary').textContent=`Просмотры уроков: ${total} · Главная страница: ${stats.get('__catalog__')?.views||0}`;
+ const sorted=[...catalog].sort((a,b)=>Number(stats.get(b.lesson_id||b.content_id)?.views||0)-Number(stats.get(a.lesson_id||a.content_id)?.views||0));
+ for(const item of sorted){if(!`${item.title} ${item.author}`.toLowerCase().includes(query))continue;
+  const id=item.lesson_id||item.content_id,s=stats.get(id),tr=document.createElement('tr');
+  for(const text of [`${item.title} — ${item.author}`,s?.views||0,s?.visitors||0,counts.get(id)||0]){const td=document.createElement('td');td.textContent=text;tr.append(td);}
+  const td=document.createElement('td'),button=document.createElement('button');button.textContent='Добавить лайки';button.disabled=busy;button.onclick=()=>apply([item]);td.append(button);tr.append(td);$('rows').append(tr);
+ }
+}
+async function apply(items){
+ if(busy)return;
+ const low=Number($('low').value),high=Number($('high').value),mode=$('mode').value;
+ if(!Number.isInteger(low)||!Number.isInteger(high)||low<0||high<low||high>1000){say('Укажите целый диапазон от 0 до 1000.');return;}
+ if(!confirm(`${mode==='fill'?'Заполнить до':'Прибавить'} ${low}–${high} лайков. Уроков: ${items.length}. Применить?`))return;
+ lock(true);let completed=0;
+ try{for(const item of items){await rpc('admin_add_lesson_likes',{p_content_id:item.lesson_id||item.content_id,p_min:low,p_max:high,p_mode:mode});completed++;}await load();say(`Готово. Обработано уроков: ${completed}.`);}
+ catch(error){say(`Обработано: ${completed}. Ошибка: ${error.message}. Сначала обновите данные, прежде чем повторять добавление.`);}
+ finally{lock(false);}
+}
+$('apply-all').onclick=()=>apply(catalog);
+$('search').oninput=render;
+async function refresh(){lock(true);try{await load();}catch(error){say(error.message);}finally{lock(false);}}
+$('refresh').onclick=refresh;$('days').onchange=refresh;
+if(sessionStorage.getItem('lesson_admin_token'))refresh();
+</script></body></html>
