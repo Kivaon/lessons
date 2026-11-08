@@ -17,12 +17,6 @@
             text-align: center;
             margin-bottom: 12px;
         }
-        .stats-line {
-            font-size: 13px;
-            color: #51606f;
-            text-align: center;
-            margin-bottom: 12px;
-        }
         h1 { font-size: 24px; color: #2c3e50; text-align: center; margin-bottom: 20px; }
         .subtitle { text-align: center; color: #6b7a89; margin: -8px 0 20px; }
         .toolbar { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
@@ -92,7 +86,6 @@
 <body>
 <div class="container">
     <div class="version-line">Ver. 261109.0124 &nbsp; 2026-11-09 01:24</div>
-    <div class="stats-line" id="total-likes-line">Всего лайков на сайте: …</div>
     <div class="toolbar">
         <input id="search-input" type="search" placeholder="Поиск по названию, автору, циклу, тегам" oninput="renderAll()">
         <select id="author-filter" onchange="renderAll()">
@@ -184,24 +177,6 @@
         const href = new URL(item?.file_path || '', window.location.href).toString();
         const message = `Здравствуйте! Хочу написать по поводу публикации: ${title}\n${href}`;
         return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    }
-
-    async function loadTotalLikesCount() {
-        const line = document.getElementById('total-likes-line');
-        if (!line) return;
-        const base = `${SUPABASE_URL}/rest/v1/content_reactions`;
-        const url = `${base}?select=id&site_key=eq.${encodeURIComponent(SITE_KEY)}&reaction_type=eq.${REACTION_TYPE}`;
-        try {
-            const response = await fetch(url, {
-                headers: { ...getSupabaseHeaders(), Prefer: 'count=exact' },
-            });
-            if (!response.ok) throw new Error('count failed');
-            const countHeader = response.headers.get('content-range') || '0-0/0';
-            const totalCount = parseInt(countHeader.split('/')[1] || '0', 10) || 0;
-            line.textContent = `Всего лайков на сайте: ${totalCount}`;
-        } catch (_) {
-            line.textContent = 'Всего лайков на сайте: недоступно';
-        }
     }
 
     function getLikeCount(item) {
@@ -711,7 +686,6 @@
         .then(async ([rubricatorData, libraryData]) => {
             rubricator = rubricatorData || { roots: {} };
             db = libraryData;
-            await loadTotalLikesCount().catch(() => {});
             await loadLikeCounts().catch(() => {
                 likeCounts = new Map();
             });
