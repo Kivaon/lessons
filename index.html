@@ -106,7 +106,7 @@
 
     <!-- Панель: Дерево тем -->
     <div id="topics-panel" class="panel"></div>
-    <footer style="text-align:center;margin:24px 0;font-size:12px"><a href="admin.html">Управление</a></footer>
+    <footer style="text-align:center;margin:24px 0;font-size:12px"><button type="button" id="open-admin">Управление</button></footer>
 </div>
 
 <script>
@@ -677,7 +677,13 @@
     function renderAll() {
         renderRecent();
         renderTree();
+        document.dispatchEvent(new Event('lesson-cards-rendered'));
     }
+
+    window.addEventListener('lesson-admin-counts', event => {
+        likeCounts = new Map(event.detail);
+        renderAll();
+    });
 
     // Загрузка рубрикатора и реестра библиотеки
     Promise.all([
@@ -718,5 +724,6 @@
     });
 </script>
 <script id="lesson-analytics" src="/lessons/analytics.js" defer></script>
+<script src="admin.js" defer></script>
 </body>
 </html>
