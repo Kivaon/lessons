@@ -85,6 +85,7 @@
 </head>
 <body>
 <div class="container">
+    <button type="button" id="open-admin" aria-label="Войти" title="Войти"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M14 3h6v18h-6M3 12h12m-4-4 4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <div class="version-line">Ver. 261109.0155 &nbsp; 2026-11-09 01:55</div>
     <div class="toolbar">
         <input id="search-input" type="search" placeholder="Поиск по названию, автору, циклу, тегам" oninput="renderAll()">
@@ -106,7 +107,6 @@
 
     <!-- Панель: Дерево тем -->
     <div id="topics-panel" class="panel"></div>
-    <footer style="text-align:center;margin:24px 0;font-size:12px"><button type="button" id="open-admin">Управление</button></footer>
 </div>
 
 <script>
@@ -724,6 +724,6 @@
     });
 </script>
 <script id="lesson-analytics" src="/lessons/analytics.js" defer></script>
-<script src="admin.js" defer></script>
+<script src="admin.js?v=261109-password" defer></script>
 </body>
 </html>
