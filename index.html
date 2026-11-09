@@ -11,6 +11,9 @@
             background-color: #f4f7f6; color: #333; margin: 0; padding: 15px;
         }
         .container { max-width: 860px; margin: 0 auto; }
+        .version-header { position: relative; display: flex; align-items: center; justify-content: center; min-height: 30px; margin-bottom: 12px; }
+        .version-header .version-line { margin-bottom: 0; }
+        .version-header #open-admin { top: 50%; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; }
         .version-line {
             font-size: 12px;
             color: #7f8c8d;
@@ -85,8 +88,10 @@
 </head>
 <body>
 <div class="container">
+    <div class="version-header">
     <button type="button" id="open-admin" aria-label="Войти" title="Войти"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M14 3h6v18h-6M3 12h12m-4-4 4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <div class="version-line">Ver. 261109.0155 &nbsp; 2026-11-09 01:55</div>
+    </div>
     <div class="toolbar">
         <input id="search-input" type="search" placeholder="Поиск по названию, автору, циклу, тегам" oninput="renderAll()">
         <select id="author-filter" onchange="renderAll()">
