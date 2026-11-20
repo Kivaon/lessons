@@ -324,6 +324,7 @@
     const synth = window.speechSynthesis;
     let activeUtterance = null;
     let allVoices = [];
+    let voiceKeys = new Map();
     let availableVoices = [];
     let speechTextCache = '';
     let currentChunkStart = 0;
@@ -499,10 +500,10 @@
     function initContactButton() {
       if (!contactAdminBtn) return;
       const title = lessonPassport.title || document.title || 'публикация';
-      const message = `Здравствуйте! Хочу написать по поводу публикации: $Нет ультраортодоксов — нет государства\n${window.location.href}`;
+      const message = `Здравствуйте! Хочу написать по поводу публикации: ${title}\n${window.location.href}`;
       contactAdminBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-      contactAdminBtn.title = `Связаться с админом в WhatsApp: $Нет ультраортодоксов — нет государства`;
-      contactAdminBtn.setAttribute('aria-label', `Связаться с админом в WhatsApp по публикации $Нет ультраортодоксов — нет государства`);
+      contactAdminBtn.title = `Связаться с админом в WhatsApp: ${title}`;
+      contactAdminBtn.setAttribute('aria-label', `Связаться с админом в WhatsApp по публикации ${title}`);
     }
 
     function getLessonLang() {
@@ -741,7 +742,7 @@
 
     function getSelectedVoice() {
       const selectedUri = voiceEl?.value || '';
-      return availableVoices.find(voice => voice.voiceURI === selectedUri) || null;
+      return availableVoices.find(voice => voiceKey(voice) === selectedUri) || null;
     }
 
     function pickFallbackVoice() {
@@ -758,6 +759,23 @@
         || null;
     }
 
+    function voiceKey(voice) {
+      return (voice && voiceKeys.get(voice)) || voice?.voiceURI || '';
+    }
+
+    function assignVoiceKeys(voices) {
+      // У разных голосов (например, Yuri и Yuri Enhanced) бывает одинаковый voiceURI:
+      // добавляем порядковый номер, чтобы их можно было выбрать по отдельности.
+      const seen = new Map();
+      voiceKeys = new Map();
+      voices.forEach(voice => {
+        const base = voice.voiceURI || voice.name || '';
+        const n = (seen.get(base) || 0) + 1;
+        seen.set(base, n);
+        voiceKeys.set(voice, n === 1 ? base : `${base}#${n}`);
+      });
+    }
+
     function canAssignVoice(voice) {
       return Boolean(voice && voice.voiceURI && voice.name);
     }
@@ -766,6 +784,7 @@
       if (!voiceEl) return;
       const filterValue = getVoiceFilterValue();
       allVoices = synth ? synth.getVoices().slice() : [];
+      assignVoiceKeys(allVoices);
       availableVoices = allVoices.filter(voice => voiceMatchesFilter(voice, filterValue));
       const preferredUri = getPreferredVoiceUri();
 
@@ -776,13 +795,15 @@
       }
 
       voiceEl.innerHTML = availableVoices.map(voice => {
-        const label = `${voice.name} (${voice.lang})${voice.default ? ' — системный' : ''}`;
-        return `<option value="${voice.voiceURI}">${label}</option>`;
+        const key = voiceKey(voice);
+        const dup = key.includes('#') ? ` — вариант ${key.split('#').pop()}` : '';
+        const label = `${voice.name} (${voice.lang})${dup}${voice.default ? ' — системный' : ''}`;
+        return `<option value="${key}">${label}</option>`;
       }).join('') + '<option value="__voice_help__">Настройка голоса...</option>';
 
-      const preferredVoice = availableVoices.find(voice => voice.voiceURI === preferredUri);
+      const preferredVoice = availableVoices.find(voice => voiceKey(voice) === preferredUri);
       const fallbackVoice = pickFallbackVoice();
-      voiceEl.value = (preferredVoice || fallbackVoice)?.voiceURI || '';
+      voiceEl.value = voiceKey(preferredVoice || fallbackVoice);
       savePreferences();
     }
 
@@ -980,7 +1001,7 @@
     voiceEl?.addEventListener('change', () => {
       if (voiceEl.value === '__voice_help__') {
         const fallbackVoice = getSelectedVoice() || pickFallbackVoice();
-        voiceEl.value = fallbackVoice?.voiceURI || '';
+        voiceEl.value = voiceKey(fallbackVoice);
         toggleVoiceHelp(true);
         return;
       }
